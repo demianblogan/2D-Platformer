@@ -1,0 +1,13 @@
+/build/
+/out/
+[Bb]in/
+[Oo]bj/
+
+.vs/
+*.user
+
+vcpkg_installed/
+
+*.obj
+*.exe
+*.pdb

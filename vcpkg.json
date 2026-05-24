@@ -1,0 +1,7 @@
+{
+  "name": "2d-platformer",
+  "dependencies": [
+    "sfml",
+    "nlohmann-json"
+  ]
+}
