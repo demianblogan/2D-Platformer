@@ -3,10 +3,10 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
-class Game
+class Application
 {
 public:
-	Game();
+	Application();
 
 	void Run();
 

@@ -11,8 +11,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(Platformer
     src/main.cpp
-    src/Game.h
-    src/Game.cpp
+    src/Application.h
+    src/Application.cpp
 )
 
 target_link_libraries(Platformer PRIVATE

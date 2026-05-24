@@ -1,22 +1,22 @@
-#include "Game.h"
+#include "Application.h"
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
-Game::Game()
+Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
 {
 	CreateWindow();
 }
 
-void Game::CreateWindow()
+void Application::CreateWindow()
 {
 	window.create(desktopMode, "2D Platformer", sf::Style::None, sf::State::Windowed);
 	window.setFramerateLimit(60);
 }
 
-void Game::Run()
+void Application::Run()
 {
 	sf::Clock clock;
 	float remainderTime = 0.0f;
@@ -42,7 +42,7 @@ void Game::Run()
 	}
 }
 
-void Game::ProcessEvents()
+void Application::ProcessEvents()
 {
 	while (const std::optional event = window.pollEvent())
 	{
@@ -57,10 +57,10 @@ void Game::ProcessEvents()
 	}
 }
 
-void Game::Update(float deltaTime)
+void Application::Update(float deltaTime)
 {}
 
-void Game::Render(float interpolationFactor)
+void Application::Render(float interpolationFactor)
 {
 	window.clear();
 	window.display();
