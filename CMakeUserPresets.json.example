@@ -1,0 +1,13 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "inherits": "base",
+      "displayName": "Default (vcpkg)",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "PATH/TO/YOUR/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    }
+  ]
+}

@@ -11,3 +11,5 @@ vcpkg_installed/
 *.obj
 *.exe
 *.pdb
+
+CMakeUserPresets.json
