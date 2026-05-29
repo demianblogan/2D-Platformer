@@ -2,6 +2,8 @@
 
 #include "ui/Element.h"
 
+#include <SFML/System/Vector2.hpp>
+
 #include <functional>
 
 namespace UI
@@ -22,14 +24,27 @@ namespace UI
 		void Press();
 		void Release();
 
+		void Activate();
+		void Deactivate();
+
+		virtual bool RequiresActivation() const { return false; }
+		bool IsActivated() const { return isActivated; }
+
 		void SetOnPressed(std::function<void()> callback);
 
 		InteractionState GetState() const { return state; }
 
+		virtual void OnDragStart(sf::Vector2f mousePosition) {}
+		virtual void OnDragMove(sf::Vector2f mousePosition) {}
+		virtual void OnDragEnd() {}
+
 	protected:
 		virtual void OnStateChanged() {}
+		virtual void OnActivated() {}
+		virtual void OnDeactivated() {}
 
 		InteractionState state = InteractionState::Normal;
+		bool isActivated = false;
 		std::function<void()> onPressed;
 	};
 }

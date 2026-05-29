@@ -39,6 +39,24 @@ namespace UI
 		}
 	}
 
+	void InteractiveElement::Activate()
+	{
+		if (!isActivated)
+		{
+			isActivated = true;
+			OnActivated();
+		}
+	}
+
+	void InteractiveElement::Deactivate()
+	{
+		if (isActivated)
+		{
+			isActivated = false;
+			OnDeactivated();
+		}
+	}
+
 	void InteractiveElement::SetOnPressed(std::function<void()> callback)
 	{
 		onPressed = std::move(callback);
