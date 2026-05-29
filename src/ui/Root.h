@@ -45,8 +45,10 @@ namespace UI
 		void HandleMouseRelease();
 		void HandleNavigation(int direction);
 		void HandleConfirm(bool pressed);
+		void HandleEscape();
 
 		void SetHighlightedIndex(int index);
+		void DeactivateCurrent();
 
 		VirtualScreen& virtualScreen;
 		std::unique_ptr<Element> content;
@@ -54,5 +56,7 @@ namespace UI
 
 		InputMode activeMode = InputMode::Cursor;
 		int highlightedIndex = -1;
+		InteractiveElement* draggedElement = nullptr;
+		InteractiveElement* activatedElement = nullptr;
 	};
 }

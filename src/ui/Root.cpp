@@ -6,8 +6,6 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Window/Event.hpp>
 
-#include <iostream>
-
 namespace UI
 {
 	Root::Root(VirtualScreen& virtualScreen)
@@ -31,11 +29,7 @@ namespace UI
 	void Root::CollectFrom(Element& element)
 	{
 		if (element.IsInteractive())
-		{
-			auto* ie = static_cast<InteractiveElement*>(&element);
-			std::cout << "collected interactive at offset.y = " << ie->offset.y << "\n";
-			interactives.push_back(ie);
-		}
+			interactives.push_back(static_cast<InteractiveElement*>(&element));
 
 		for (Element* child : element.GetChildren())
 			CollectFrom(*child);
@@ -43,6 +37,39 @@ namespace UI
 
 	void Root::HandleEvent(const sf::Event& event)
 	{
+		if (activatedElement)
+		{
+			if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+			{
+				if (key->code == sf::Keyboard::Key::Escape)
+				{
+					HandleEscape();
+					return;
+				}
+			}
+
+			if (event.getIf<sf::Event::MouseButtonPressed>())
+			{
+				const sf::Vector2f mouse = virtualScreen.GetMousePosition();
+				const sf::FloatRect bounds(activatedElement->GetAbsolutePosition(), activatedElement->size);
+
+				if (!bounds.contains(mouse))
+				{
+					DeactivateCurrent();
+				}
+				else
+				{
+					activatedElement->HandleEvent(event);
+					return;
+				}
+			}
+			else
+			{
+				activatedElement->HandleEvent(event);
+				return;
+			}
+		}
+
 		if (event.getIf<sf::Event::MouseMoved>())
 		{
 			activeMode = InputMode::Cursor;
@@ -86,6 +113,12 @@ namespace UI
 	{
 		const sf::Vector2f mouse = virtualScreen.GetMousePosition();
 
+		if (draggedElement)
+		{
+			draggedElement->OnDragMove(mouse);
+			return;
+		}
+
 		int foundIndex = -1;
 
 		for (int i = 0; i < static_cast<int>(interactives.size()); i++)
@@ -105,13 +138,30 @@ namespace UI
 	void Root::HandleMousePress()
 	{
 		if (highlightedIndex >= 0)
-			interactives[highlightedIndex]->Press();
+		{
+			InteractiveElement* element = interactives[highlightedIndex];
+			element->Press();
+
+			draggedElement = element;
+			element->OnDragStart(virtualScreen.GetMousePosition());
+		}
 	}
 
 	void Root::HandleMouseRelease()
 	{
-		if (highlightedIndex >= 0)
-			interactives[highlightedIndex]->Release();
+		if (draggedElement)
+		{
+			draggedElement->OnDragEnd();
+			draggedElement->Release();
+
+			if (draggedElement->RequiresActivation() && !draggedElement->IsActivated())
+			{
+				activatedElement = draggedElement;
+				draggedElement->Activate();
+			}
+
+			draggedElement = nullptr;
+		}
 	}
 
 	void Root::HandleNavigation(int direction)
@@ -135,16 +185,40 @@ namespace UI
 		if (highlightedIndex < 0)
 			return;
 
+		InteractiveElement* element = interactives[highlightedIndex];
+
 		if (pressed)
-			interactives[highlightedIndex]->Press();
+		{
+			element->Press();
+		}
 		else
-			interactives[highlightedIndex]->Release();
+		{
+			element->Release();
+
+			if (element->RequiresActivation() && !element->IsActivated())
+			{
+				activatedElement = element;
+				element->Activate();
+			}
+		}
+	}
+
+	void Root::HandleEscape()
+	{
+		DeactivateCurrent();
+	}
+
+	void Root::DeactivateCurrent()
+	{
+		if (activatedElement)
+		{
+			activatedElement->Deactivate();
+			activatedElement = nullptr;
+		}
 	}
 
 	void Root::SetHighlightedIndex(int index)
 	{
-		//std::cout << "highlight index: " << index << " (total " << interactives.size() << ")\n";
-
 		if (index == highlightedIndex)
 			return;
 
