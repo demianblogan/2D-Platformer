@@ -1,0 +1,20 @@
+{
+	"Sprite":
+	{
+		"textureName": "apple"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "apple",
+			"frameCount": 17,
+			"frameDuration": 0.04,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	}
+}

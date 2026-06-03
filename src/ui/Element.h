@@ -5,6 +5,7 @@
 #include <SFML/System/Vector2.hpp>
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace sf
@@ -29,11 +30,15 @@ namespace UI
 
 		std::vector<Element*> GetChildren() const;
 
+		Element* FindByName(const std::string& name);
+
 		virtual bool IsInteractive() const { return false; }
 		sf::Vector2f GetAbsolutePosition() const { return absolutePosition; }
 
 		Animation& AddAnimation(std::unique_ptr<Animation> animation);
 		void ClearAnimations();
+
+		std::string name;
 
 		sf::Vector2f anchor = { 0.0f, 0.0f }; // anchor point in the parent (0..1 of its size)
 		sf::Vector2f pivot = { 0.0f, 0.0f };  // point within this element aligned with the parent's anchor (0..1 of this element's size)

@@ -1,0 +1,16 @@
+{
+	"terrain": "assets/textures/terrain/terrain_(16x16).png",
+	"angry_pig_walk": "assets/textures/enemies/angry_pig/Walk (36x30).png",
+	"chicken_run": "assets/textures/enemies/chicken/Run (32x34).png",
+	"snail_walk": "assets/textures/enemies/snail/Walk (38x24).png",
+	"saw_on": "assets/textures/traps/saw/On (38x38).png",
+	"bat_idle": "assets/textures/enemies/bat/Idle (46x30).png",
+	"bee_idle": "assets/textures/enemies/bee/Idle (36x34).png",
+	"rock1_idle": "assets/textures/enemies/rocks/Rock1_Idle (38x34).png",
+	"turtle_idle": "assets/textures/enemies/turtle/Idle 1 (44x26).png",
+	"apple": "assets/textures/items/fruits/Apple.png",
+	"bananas": "assets/textures/items/fruits/Bananas.png",
+	"melon": "assets/textures/items/fruits/Melon.png",
+	"spikes": "assets/textures/traps/spikes/Idle.png",
+	"green": "assets/textures/background/green.png"
+}

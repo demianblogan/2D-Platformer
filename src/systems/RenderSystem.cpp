@@ -45,14 +45,19 @@ namespace ECS
 					const Animation& animation = registry.Get<Animation>(entity);
 					frameWidth = static_cast<int>(texture.getSize().x) / animation.data.frameCount;
 
+					const int displayedFrame = animation.data.isReversed
+						? (animation.data.frameCount - 1 - animation.currentFrame)
+						: animation.currentFrame;
+
 					const sf::IntRect frameRect(
-						{ animation.currentFrame * frameWidth, 0 },
+						{ displayedFrame * frameWidth, 0 },
 						{ frameWidth, frameHeight });
 
 					drawable.setTextureRect(frameRect);
 				}
 
-				drawable.setOrigin({ frameWidth / 2.0f, frameHeight / 2.0f });
+				// Origin at bottom-center: Transform position is the entity's feet.
+				drawable.setOrigin({ frameWidth / 2.0f, static_cast<float>(frameHeight) });
 
 				if (registry.Has<Facing>(entity))
 				{

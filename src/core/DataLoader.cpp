@@ -1,13 +1,14 @@
 #include "DataLoader.h"
 
-#include "components/Sprite.h"
-#include "components/Transform.h"
-#include "components/PreviousTransform.h"
-#include "components/Velocity.h"
+#include "components/Animation.h"
 #include "components/AnimationSet.h"
 #include "components/AnimationState.h"
 #include "components/Facing.h"
-#include "components/Animation.h"
+#include "components/Patrol.h"
+#include "components/PreviousTransform.h"
+#include "components/Sprite.h"
+#include "components/Transform.h"
+#include "components/Velocity.h"
 #include "core/ecs/Registry.h"
 
 #include <fstream>
@@ -54,6 +55,7 @@ void DataLoader::RegisterLoaders()
 				animation.frameCount = animationData.at("frameCount");
 				animation.frameDuration = animationData.at("frameDuration");
 				animation.isLooping = animationData.at("isLooping");
+				animation.isReversed = animationData.value("reversed", false);
 
 				set.animations[stateName] = animation;
 			}
@@ -75,12 +77,29 @@ void DataLoader::RegisterLoaders()
 			facing.isTextureRight = data.at("isTextureRight");
 			registry.Add<ECS::Facing>(entity, facing);
 		};
+
+	loaders["Patrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Patrol patrol;
+
+			const std::string axis = data.at("axis");
+			patrol.axis = (axis == "Vertical") ? ECS::Patrol::Axis::Vertical : ECS::Patrol::Axis::Horizontal;
+
+			patrol.min = data.at("min");
+			patrol.max = data.at("max");
+			patrol.speed = data.at("speed");
+
+			registry.Add<ECS::Patrol>(entity, patrol);
+		};
 }
 
 void DataLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector<ECS::Entity>& entities)
 {
 	for (const ECS::Entity entity : entities)
 	{
+		if (registry.Has<ECS::Patrol>(entity) && !registry.Has<ECS::Velocity>(entity))
+			registry.Add<ECS::Velocity>(entity, {});
+
 		if (registry.Has<ECS::Velocity>(entity) && registry.Has<ECS::Transform>(entity)
 			&& !registry.Has<ECS::PreviousTransform>(entity))
 		{
@@ -122,6 +141,24 @@ ECS::Entity DataLoader::LoadEntityFromFile(ECS::Registry& registry, const std::s
 	return LoadEntity(registry, entityJson);
 }
 
+ECS::Entity DataLoader::LoadPrefabbedEntity(ECS::Registry& registry, const nlohmann::json& entry)
+{
+	nlohmann::json overrides = entry;
+
+	const std::string prefabPath = overrides.at("prefab");
+	overrides.erase("prefab");
+
+	std::ifstream prefabFile(prefabPath);
+
+	if (!prefabFile.is_open())
+		throw std::runtime_error("Could not open prefab file: " + prefabPath);
+
+	nlohmann::json merged = nlohmann::json::parse(prefabFile);
+	merged.merge_patch(overrides);
+
+	return LoadEntity(registry, merged);
+}
+
 std::vector<ECS::Entity> DataLoader::LoadScene(ECS::Registry& registry, const std::string& scenePath)
 {
 	std::ifstream sceneFile(scenePath);
@@ -134,22 +171,61 @@ std::vector<ECS::Entity> DataLoader::LoadScene(ECS::Registry& registry, const st
 	std::vector<ECS::Entity> createdEntities;
 
 	for (const auto& entityJson : sceneJson.at("entities"))
+		createdEntities.push_back(LoadPrefabbedEntity(registry, entityJson));
+
+	AddImpliedComponents(registry, createdEntities);
+
+	return createdEntities;
+}
+
+std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, const std::string& mapPath)
+{
+	std::ifstream mapFile(mapPath);
+
+	if (!mapFile.is_open())
+		throw std::runtime_error("Could not open map file: " + mapPath);
+
+	const nlohmann::json mapJson = nlohmann::json::parse(mapFile);
+
+	std::vector<ECS::Entity> createdEntities;
+
+	for (const auto& layer : mapJson.at("layers"))
 	{
-		nlohmann::json overrides = entityJson;
+		if (layer.value("type", std::string()) != "objectgroup")
+			continue;
 
-		const std::string prefabPath = overrides.at("prefab");
-		overrides.erase("prefab");
+		for (const auto& object : layer.at("objects"))
+		{
+			const std::string className = object.value("type", std::string());
 
-		std::ifstream prefabFile(prefabPath);
+			// Skip non-entity markers (e.g. the camera guide): no class, or not a point.
+			if (className.empty() || !object.value("point", false))
+				continue;
 
-		if (!prefabFile.is_open())
-			throw std::runtime_error("Could not open prefab file: " + prefabPath);
+			const float x = object.at("x");
+			const float y = object.at("y");
 
-		nlohmann::json merged = nlohmann::json::parse(prefabFile);
-		merged.merge_patch(overrides);
+			nlohmann::json entry;
+			entry["prefab"] = "data/prefabs/" + className + ".json";
+			entry["Transform"]["x"] = x;
+			entry["Transform"]["y"] = y;
 
-		const ECS::Entity entity = LoadEntity(registry, merged);
-		createdEntities.push_back(entity);
+			// patrolRange custom property -> Patrol bounds. Axis and speed stay from the prefab.
+			if (object.contains("properties"))
+			{
+				for (const auto& property : object["properties"])
+				{
+					if (property.value("name", std::string()) == "patrolRange")
+					{
+						const float range = property.at("value");
+						entry["Patrol"]["min"] = x - range;
+						entry["Patrol"]["max"] = x + range;
+					}
+				}
+			}
+
+			createdEntities.push_back(LoadPrefabbedEntity(registry, entry));
+		}
 	}
 
 	AddImpliedComponents(registry, createdEntities);

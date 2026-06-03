@@ -6,7 +6,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Text.hpp>
 
-#include <iostream>
+#include <algorithm>
+#include <cmath>
 
 namespace UI
 {
@@ -34,8 +35,20 @@ namespace UI
 
 	void Label::SetAlpha(float alpha)
 	{
-		std::uint8_t byteAlpha = static_cast<std::uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
+		const std::uint8_t byteAlpha = static_cast<std::uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
 		color.a = byteAlpha;
+		outlineColor.a = byteAlpha;
+	}
+
+	void Label::SetOutlineColor(sf::Color color)
+	{
+		outlineColor = color;
+	}
+
+	void Label::SetOutlineThickness(float thickness)
+	{
+		outlineThickness = thickness;
+		RecalculateSize();
 	}
 
 	void Label::RecalculateSize()
@@ -43,6 +56,7 @@ namespace UI
 		const sf::Font& font = resources.fonts.Get(fontName);
 
 		sf::Text measuredText(font, text, characterSize);
+		measuredText.setOutlineThickness(outlineThickness);
 		const sf::FloatRect bounds = measuredText.getLocalBounds();
 
 		size = { std::ceil(bounds.size.x), std::ceil(bounds.size.y) };
@@ -54,6 +68,8 @@ namespace UI
 
 		sf::Text drawableText(font, text, characterSize);
 		drawableText.setFillColor(color);
+		drawableText.setOutlineColor(outlineColor);
+		drawableText.setOutlineThickness(outlineThickness);
 
 		const sf::FloatRect bounds = drawableText.getLocalBounds();
 		sf::Vector2f finalPosition = absolutePosition - bounds.position;

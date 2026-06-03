@@ -1,0 +1,32 @@
+{
+	"Sprite":
+	{
+		"textureName": "snail_walk"
+	},
+	"AnimationSet":
+	{
+		"Walk":
+		{
+			"textureName": "snail_walk",
+			"frameCount": 10,
+			"frameDuration": 0.12,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Walk"
+	},
+	"Facing":
+	{
+		"isLookingRight": true,
+		"isTextureRight": false
+	},
+	"Patrol":
+	{
+		"axis": "Horizontal",
+		"min": 0,
+		"max": 0,
+		"speed": 12
+	}
+}

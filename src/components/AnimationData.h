@@ -10,5 +10,6 @@ namespace ECS
 		int frameCount = 1;
 		float frameDuration = 0.1f;
 		bool isLooping = true;
+		bool isReversed = false;
 	};
 }
