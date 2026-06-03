@@ -1,6 +1,6 @@
 #include "Application.h"
 
-#include "states/TestState.h"
+#include "states/SplashState.h"
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
@@ -14,6 +14,7 @@ Application::Application()
 	, context(virtualScreen, stateMachine, resources, audioMixer)
 {
 	CreateWindow();
+	audioMixer.LoadFromFile("data/audio.json");
 	RegisterInitialState();
 }
 
@@ -25,7 +26,7 @@ void Application::CreateWindow()
 
 void Application::RegisterInitialState()
 {
-	stateMachine.Push(std::make_unique<TestState>(context));
+	stateMachine.Push(std::make_unique<SplashState>(context));
 }
 
 void Application::Run()

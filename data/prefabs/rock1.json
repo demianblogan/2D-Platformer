@@ -1,0 +1,20 @@
+{
+	"Sprite":
+	{
+		"textureName": "rock1_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "rock1_idle",
+			"frameCount": 14,
+			"frameDuration": 0.1,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	}
+}

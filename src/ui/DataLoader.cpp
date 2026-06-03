@@ -21,6 +21,8 @@ namespace UI
 	{
 		void ApplyCommonFields(Element& element, const nlohmann::json& data)
 		{
+			if (data.contains("name"))
+				element.name = data["name"];
 			if (data.contains("size"))
 				element.size = { data["size"][0], data["size"][1] };
 			if (data.contains("anchor"))
@@ -212,6 +214,10 @@ namespace UI
 					label->SetCharacterSize(data["characterSize"]);
 				if (data.contains("color"))
 					label->SetColor(ParseColor(data["color"]));
+				if (data.contains("outlineColor"))
+					label->SetOutlineColor(ParseColor(data["outlineColor"]));
+				if (data.contains("outlineThickness"))
+					label->SetOutlineThickness(data["outlineThickness"]);
 				if (data.contains("text"))
 					label->SetText(data["text"]);
 

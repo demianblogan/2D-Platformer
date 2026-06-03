@@ -1,0 +1,92 @@
+{
+	"Element":
+	{
+		"name": "root",
+		"size":
+		[
+			480,
+			270
+		],
+		"children":
+		[
+			{
+				"Label":
+				{
+					"name": "title",
+					"anchor":
+					[
+						0.5,
+						0
+					],
+					"pivot":
+					[
+						0.5,
+						0
+					],
+					"offset":
+					[
+						0,
+						50
+					],
+					"fontName": "main",
+					"characterSize": 64,
+					"color":
+					[
+						247,
+						198,
+						70,
+						255
+					],
+					"outlineColor":
+					[
+						99,
+						54,
+						22,
+						255
+					],
+					"outlineThickness": 3,
+					"text": "Wild Adventure"
+				}
+			},
+			{
+				"Label":
+				{
+					"name": "prompt",
+					"anchor":
+					[
+						0.5,
+						0
+					],
+					"pivot":
+					[
+						0.5,
+						0
+					],
+					"offset":
+					[
+						0,
+						175
+					],
+					"fontName": "main",
+					"characterSize": 24,
+					"color":
+					[
+						255,
+						255,
+						255,
+						255
+					],
+					"outlineColor":
+					[
+						60,
+						38,
+						24,
+						255
+					],
+					"outlineThickness": 1,
+					"text": "Press any key to start"
+				}
+			}
+		]
+	}
+}

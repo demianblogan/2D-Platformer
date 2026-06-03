@@ -1,0 +1,20 @@
+{
+	"Sprite":
+	{
+		"textureName": "bananas"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "bananas",
+			"frameCount": 17,
+			"frameDuration": 0.04,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	}
+}

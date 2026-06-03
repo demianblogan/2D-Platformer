@@ -62,6 +62,20 @@ namespace UI
 		return result;
 	}
 
+	Element* Element::FindByName(const std::string& targetName)
+	{
+		if (name == targetName)
+			return this;
+
+		for (const auto& child : children)
+		{
+			if (Element* found = child->FindByName(targetName))
+				return found;
+		}
+
+		return nullptr;
+	}
+
 	Animation& Element::AddAnimation(std::unique_ptr<Animation> animation)
 	{
 		animations.push_back(std::move(animation));

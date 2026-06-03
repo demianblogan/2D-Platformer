@@ -19,6 +19,8 @@ namespace UI
 		void SetCharacterSize(unsigned int characterSize);
 		void SetColor(sf::Color color);
 		void SetAlpha(float alpha);
+		void SetOutlineColor(sf::Color color);
+		void SetOutlineThickness(float thickness);
 
 	protected:
 		void DrawSelf(sf::RenderTarget& target, sf::Vector2f absolutePosition) const override;
@@ -31,5 +33,7 @@ namespace UI
 		std::string text;
 		unsigned int characterSize = 16;
 		sf::Color color = sf::Color::White;
+		sf::Color outlineColor = sf::Color::Transparent;
+		float outlineThickness = 0.0f;
 	};
 }

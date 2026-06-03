@@ -32,6 +32,8 @@ namespace UI
 
 		Element& SetContent(std::unique_ptr<Element> content);
 
+		Element* FindByName(const std::string& name);
+
 		void HandleEvent(const sf::Event& event);
 		void Update(float deltaTime);
 		void Draw(sf::RenderTarget& target) const;

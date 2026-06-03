@@ -19,6 +19,11 @@ namespace UI
 		return *content;
 	}
 
+	Element* Root::FindByName(const std::string& name)
+	{
+		return content ? content->FindByName(name) : nullptr;
+	}
+
 	void Root::CollectInteractives()
 	{
 		interactives.clear();
