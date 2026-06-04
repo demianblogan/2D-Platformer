@@ -7,8 +7,22 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
+#include <algorithm>
+
 namespace ECS
 {
+	namespace
+	{
+		float Approach(float current, float target, float maxDelta)
+		{
+			if (current < target)
+				return std::min(current + maxDelta, target);
+			if (current > target)
+				return std::max(current - maxDelta, target);
+			return target;
+		}
+	}
+
 	InputSystem::InputSystem(Registry& registry)
 		: registry(registry)
 	{}
@@ -31,12 +45,16 @@ namespace ECS
 		registry.ForEach<Player, Velocity, Jump>(
 			[direction, jumpEdge, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump)
 			{
-				// During the wall-jump lock the push carries the player away from the wall;
-				// input must not overwrite horizontal velocity yet.
 				if (jump.lockTimer > 0.0f)
+				{
 					jump.lockTimer -= deltaTime;
+				}
 				else
-					velocity.x = direction * player.moveSpeed;
+				{
+					const float target = direction * player.moveSpeed;
+					const float rate = (direction != 0.0f) ? player.acceleration : player.deceleration;
+					velocity.x = Approach(velocity.x, target, rate * deltaTime);
+				}
 
 				if (jumpEdge)
 					jump.wantsToJump = true;
