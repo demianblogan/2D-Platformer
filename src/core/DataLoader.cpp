@@ -118,6 +118,8 @@ void DataLoader::RegisterLoaders()
 		{
 			ECS::Player player;
 			player.moveSpeed = data.at("moveSpeed");
+			player.acceleration = data.at("acceleration");
+			player.deceleration = data.at("deceleration");
 			registry.Add<ECS::Player>(entity, player);
 		};
 

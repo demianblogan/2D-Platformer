@@ -69,7 +69,9 @@
 	},
 	"Player":
 	{
-		"moveSpeed": 90
+		"moveSpeed": 120,
+		"acceleration": 600,
+		"deceleration": 1200
 	},
 	"Jump":
 	{
