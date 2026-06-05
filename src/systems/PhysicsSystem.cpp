@@ -1,18 +1,22 @@
 #include "PhysicsSystem.h"
 
+#include "components/Box.h"
+#include "components/BoxHit.h"
 #include "components/Collider.h"
 #include "components/CollisionState.h"
 #include "components/Facing.h"
 #include "components/Gravity.h"
-#include "components/Health.h"
 #include "components/PreviousTransform.h"
+#include "components/Solid.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "components/WallSlide.h"
+#include "components/Health.h"
 #include "core/ecs/Registry.h"
 #include "tilemap/Tilemap.h"
 
 #include <cmath>
+#include <vector>
 
 namespace ECS
 {
@@ -23,8 +27,18 @@ namespace ECS
 
 	void PhysicsSystem::Update(float deltaTime)
 	{
+		// Gather solid boxes once (positions are copies; safe to mutate components during the player loop).
+		std::vector<SolidBox> boxes;
+		registry.ForEach<Solid, Transform>(
+			[&boxes](Entity entity, Solid& solid, Transform& transform)
+			{
+				const float halfWidth = solid.width / 2.0f;
+				boxes.push_back({ entity, transform.x - halfWidth, transform.x + halfWidth,
+					transform.y - solid.height, transform.y, solid.bounceSpeed });
+			});
+
 		registry.ForEach<Transform, Velocity, Collider, Gravity, CollisionState>(
-			[this, deltaTime](Entity entity, Transform& transform, Velocity& velocity,
+			[this, deltaTime, &boxes](Entity entity, Transform& transform, Velocity& velocity,
 				Collider& collider, Gravity& gravity, CollisionState& collisionState)
 			{
 				if (registry.Has<PreviousTransform>(entity))
@@ -46,16 +60,19 @@ namespace ECS
 
 				transform.x += velocity.x * deltaTime;
 				if (!dead)
+				{
 					ResolveHorizontal(transform, collider, velocity);
+					ResolveHorizontalBoxes(transform, collider, velocity, boxes);
+				}
 
 				if (!dead)
 				{
-					if (IsWallAt(transform, collider, 1))
+					if (IsWallAt(transform, collider, 1) || IsBoxWallAt(transform, collider, 1, boxes))
 					{
 						collisionState.isOnWall = true;
 						collisionState.wallDirection = 1;
 					}
-					else if (IsWallAt(transform, collider, -1))
+					else if (IsWallAt(transform, collider, -1) || IsBoxWallAt(transform, collider, -1, boxes))
 					{
 						collisionState.isOnWall = true;
 						collisionState.wallDirection = -1;
@@ -71,7 +88,10 @@ namespace ECS
 
 				transform.y += velocity.y * deltaTime;
 				if (!dead)
+				{
 					ResolveVertical(transform, collider, velocity, collisionState);
+					ResolveVerticalBoxes(transform, collider, velocity, collisionState, boxes);
+				}
 
 				if (registry.Has<Facing>(entity))
 				{
@@ -195,6 +215,95 @@ namespace ECS
 		for (int row = firstRow; row <= lastRow; row++)
 		{
 			if (tilemap.IsSolid(column, row))
+				return true;
+		}
+
+		return false;
+	}
+
+	void PhysicsSystem::ResolveHorizontalBoxes(Transform& transform, const Collider& collider, Velocity& velocity, const std::vector<SolidBox>& boxes) const
+	{
+		if (velocity.x == 0.0f)
+			return;
+
+		const float halfWidth = collider.width / 2.0f;
+		const float top = transform.y - collider.height;
+		const float bottom = transform.y;
+
+		for (const SolidBox& box : boxes)
+		{
+			const float left = transform.x - halfWidth;
+			const float right = transform.x + halfWidth;
+
+			const bool overlap = left < box.right && right > box.left && top < box.bottom && bottom > box.top;
+			if (!overlap)
+				continue;
+
+			if (velocity.x > 0.0f)
+				transform.x = box.left - halfWidth;
+			else
+				transform.x = box.right + halfWidth;
+
+			velocity.x = 0.0f;
+		}
+	}
+
+	void PhysicsSystem::ResolveVerticalBoxes(Transform& transform, const Collider& collider, Velocity& velocity, CollisionState& collisionState, const std::vector<SolidBox>& boxes)
+	{
+		if (velocity.y == 0.0f)
+			return;
+
+		const float halfWidth = collider.width / 2.0f;
+
+		for (const SolidBox& box : boxes)
+		{
+			const float left = transform.x - halfWidth;
+			const float right = transform.x + halfWidth;
+			const float top = transform.y - collider.height;
+			const float bottom = transform.y;
+
+			const bool overlap = left < box.right && right > box.left && top < box.bottom && bottom > box.top;
+			if (!overlap)
+				continue;
+
+			if (velocity.y > 0.0f) // landed on the box top
+			{
+				transform.y = box.top;
+
+				if (box.bounceSpeed > 0.0f)
+				{
+					velocity.y = -box.bounceSpeed; // trampoline
+				}
+				else
+				{
+					velocity.y = 0.0f;
+					collisionState.isOnGround = true;
+				}
+			}
+			else // hit the box from below
+			{
+				transform.y = box.bottom + collider.height;
+				velocity.y = 0.0f;
+			}
+
+			if (!registry.Has<BoxHit>(box.entity))
+				registry.Add<BoxHit>(box.entity, {});
+		}
+	}
+
+	bool PhysicsSystem::IsBoxWallAt(const Transform& transform, const Collider& collider, int direction, const std::vector<SolidBox>& boxes) const
+	{
+		const float halfWidth = collider.width / 2.0f;
+		const float top = transform.y - collider.height;
+		const float bottom = transform.y;
+
+		const float edge = (direction > 0) ? (transform.x + halfWidth) : (transform.x - halfWidth);
+		const float probe = edge + direction * 1.0f;
+
+		for (const SolidBox& box : boxes)
+		{
+			const bool verticalOverlap = top < box.bottom && (bottom - 0.001f) > box.top;
+			if (verticalOverlap && probe >= box.left && probe <= box.right)
 				return true;
 		}
 

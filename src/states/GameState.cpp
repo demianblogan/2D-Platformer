@@ -30,6 +30,7 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	, deathSystem(registry)
 	, patrolSystem(registry)
 	, physicsSystem(registry, tilemap)
+	, boxSystem(registry)
 	, movementSystem(registry)
 	, pickupSystem(registry, score)
 	, animationSystem(registry)
@@ -156,6 +157,7 @@ void GameState::Update(float deltaTime)
 	deathSystem.Update(deltaTime);
 	patrolSystem.Update();
 	physicsSystem.Update(deltaTime);
+	boxSystem.Update();
 	movementSystem.Update(deltaTime);
 	pickupSystem.Update();
 

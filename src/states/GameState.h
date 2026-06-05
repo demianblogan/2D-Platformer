@@ -17,6 +17,7 @@
 #include "systems/PickupSystem.h"
 #include "systems/PlayerAnimationSystem.h"
 #include "systems/RenderSystem.h"
+#include "systems/BoxSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
@@ -57,6 +58,7 @@ private:
 	ECS::DeathSystem deathSystem;
 	ECS::PatrolSystem patrolSystem;
 	ECS::PhysicsSystem physicsSystem;
+	ECS::BoxSystem boxSystem;
 	ECS::MovementSystem movementSystem;
 	ECS::PickupSystem pickupSystem;
 	ECS::AnimationSystem animationSystem;

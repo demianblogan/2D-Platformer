@@ -13,13 +13,15 @@
 #include "components/Sprite.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
-#include "core/ecs/Registry.h"
 #include "components/Jump.h"
 #include "components/WallSlide.h"
 #include "components/Hazard.h"
 #include "components/Health.h"
 #include "components/Hitbox.h"
 #include "components/Collectible.h"
+#include "components/Box.h"
+#include "components/Solid.h"
+#include "core/ecs/Registry.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -184,6 +186,27 @@ void DataLoader::RegisterLoaders()
 			ECS::Collectible collectible;
 			collectible.points = data.at("points");
 			registry.Add<ECS::Collectible>(entity, collectible);
+		};
+
+	loaders["Solid"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Solid solid;
+			solid.width = data.at("width");
+			solid.height = data.at("height");
+			solid.bounceSpeed = data.value("bounceSpeed", 0.0f);
+			registry.Add<ECS::Solid>(entity, solid);
+		};
+
+	loaders["Box"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Box box;
+			box.hitsToBreak = data.at("hitsToBreak");
+			box.dropFruitPerHit = data.at("dropFruitPerHit");
+
+			for (const auto& fruit : data.at("fruits"))
+				box.fruits.push_back(fruit.get<std::string>());
+
+			registry.Add<ECS::Box>(entity, box);
 		};
 }
 
