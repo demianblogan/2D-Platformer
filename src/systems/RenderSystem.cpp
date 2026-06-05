@@ -2,6 +2,7 @@
 
 #include "components/Animation.h"
 #include "components/Facing.h"
+#include "components/Health.h"
 #include "components/PreviousTransform.h"
 #include "components/Sprite.h"
 #include "components/Transform.h"
@@ -26,6 +27,14 @@ namespace ECS
 		registry.ForEach<Transform, Sprite>(
 			[this, interpolationFactor](Entity entity, Transform& transform, Sprite& sprite)
 			{
+				// Blink while invulnerable: hide on alternate short windows.
+				if (registry.Has<Health>(entity))
+				{
+					const Health& health = registry.Get<Health>(entity);
+					if (health.invulnerabilityTimer > 0.0f && std::fmod(health.invulnerabilityTimer, 0.16f) < 0.08f)
+						return;
+				}
+
 				float renderX = transform.x;
 				float renderY = transform.y;
 
@@ -67,7 +76,6 @@ namespace ECS
 						drawable.setScale({ -1.0f, 1.0f });
 				}
 
-				// Snap to whole virtual pixels so moving sprites stay crisp on upscale.
 				drawable.setPosition({ std::floor(renderX), std::floor(renderY) });
 
 				renderTarget.draw(drawable);
