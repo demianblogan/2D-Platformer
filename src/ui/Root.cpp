@@ -82,45 +82,6 @@ namespace UI
 			HandleMouseRelease();
 			return;
 		}
-
-		if (activatedElement != nullptr)
-		{
-			if (const auto* key = event.getIf<sf::Event::KeyPressed>())
-			{
-				if (key->code == sf::Keyboard::Key::Escape)
-				{
-					DeactivateCurrent();
-					return;
-				}
-			}
-
-			activatedElement->HandleEvent(event);
-			return;
-		}
-
-		if (const auto* key = event.getIf<sf::Event::KeyPressed>())
-		{
-			if (key->code == sf::Keyboard::Key::Down || key->code == sf::Keyboard::Key::Right)
-			{
-				activeMode = InputMode::Selection;
-				HandleNavigation(1);
-			}
-			else if (key->code == sf::Keyboard::Key::Up || key->code == sf::Keyboard::Key::Left)
-			{
-				activeMode = InputMode::Selection;
-				HandleNavigation(-1);
-			}
-			else if (key->code == sf::Keyboard::Key::Enter)
-			{
-				activeMode = InputMode::Selection;
-				HandleConfirm(true);
-			}
-		}
-		else if (const auto* keyReleased = event.getIf<sf::Event::KeyReleased>())
-		{
-			if (keyReleased->code == sf::Keyboard::Key::Enter)
-				HandleConfirm(false);
-		}
 	}
 
 	void Root::HandleMouseMove()
@@ -251,5 +212,28 @@ namespace UI
 		if (content)
 			content->Draw(target, { 0.0f, 0.0f },
 				{ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
+	}
+
+	void Root::NavigateNext()
+	{
+		activeMode = InputMode::Selection;
+		HandleNavigation(1);
+	}
+
+	void Root::NavigatePrevious()
+	{
+		activeMode = InputMode::Selection;
+		HandleNavigation(-1);
+	}
+
+	void Root::Confirm(bool pressed)
+	{
+		activeMode = InputMode::Selection;
+		HandleConfirm(pressed);
+	}
+
+	void Root::CancelActivation()
+	{
+		DeactivateCurrent();
 	}
 }

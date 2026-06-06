@@ -38,6 +38,12 @@ namespace UI
 		void Update(float deltaTime);
 		void Draw(sf::RenderTarget& target) const;
 
+		void NavigateNext();
+		void NavigatePrevious();
+		void Confirm(bool pressed);
+		void CancelActivation();
+		bool IsElementActivated() const { return activatedElement != nullptr; }
+
 	private:
 		void CollectInteractives();
 		void CollectInteractivesFrom(Element& element);
