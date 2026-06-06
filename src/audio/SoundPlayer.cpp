@@ -56,6 +56,39 @@ namespace Audio
 		freeSlot->sound->play();
 	}
 
+	void SoundPlayer::StartLoop(const std::string& name)
+	{
+		const auto found = registeredSounds.find(name);
+		if (found == registeredSounds.end())
+			throw std::runtime_error("Audio::SoundPlayer: sound '" + name + "' is not registered");
+
+		const auto existing = loops.find(name);
+		if (existing != loops.end() && existing->second->getStatus() == sf::Sound::Status::Playing)
+			return; // already looping
+
+		const SoundConfig& config = found->second;
+		const sf::SoundBuffer& buffer = resources.sounds.Get(config.bufferName);
+
+		auto sound = std::make_unique<sf::Sound>(buffer);
+		sound->setLooping(true);
+		sound->setRelativeToListener(true);
+		sound->setPosition({ 0.0f, 0.0f, 0.0f });
+		sound->setVolume(config.volume * masterVolume * 100.0f);
+		sound->play();
+
+		loops[name] = std::move(sound);
+	}
+
+	void SoundPlayer::StopLoop(const std::string& name)
+	{
+		const auto found = loops.find(name);
+		if (found == loops.end())
+			return;
+
+		found->second->stop();
+		loops.erase(found);
+	}
+
 	void SoundPlayer::SetVolume(float volume)
 	{
 		masterVolume = std::clamp(volume, 0.0f, 1.0f);
@@ -63,6 +96,13 @@ namespace Audio
 		for (SoundSlot& slot : pool)
 			if (slot.sound->getStatus() == sf::Sound::Status::Playing)
 				slot.sound->setVolume(slot.baseVolume * masterVolume * 100.0f);
+
+		for (auto& [name, sound] : loops)
+		{
+			const auto config = registeredSounds.find(name);
+			const float baseVolume = (config != registeredSounds.end()) ? config->second.volume : 1.0f;
+			sound->setVolume(baseVolume * masterVolume * 100.0f);
+		}
 	}
 
 	void SoundPlayer::SetSpatialAttenuation(float minDistance, float attenuation)

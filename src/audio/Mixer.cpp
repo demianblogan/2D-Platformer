@@ -50,6 +50,16 @@ namespace Audio
 		soundPlayer.PlayAt(name, position);
 	}
 
+	void Mixer::StartLoop(const std::string& name)
+	{
+		soundPlayer.StartLoop(name);
+	}
+
+	void Mixer::StopLoop(const std::string& name)
+	{
+		soundPlayer.StopLoop(name);
+	}
+
 	void Mixer::SetSoundVolume(float volume)
 	{
 		soundPlayer.SetVolume(volume);

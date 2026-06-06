@@ -8,6 +8,11 @@
 class DataLoader;
 class ParticleSystem;
 
+namespace Audio
+{
+	class Mixer;
+}
+
 namespace ECS
 {
 	class Registry;
@@ -15,7 +20,7 @@ namespace ECS
 	class BoxSystem
 	{
 	public:
-		BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles);
+		BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer);
 
 		void Update();
 
@@ -25,6 +30,8 @@ namespace ECS
 		Registry& registry;
 		DataLoader& loader;
 		ParticleSystem& particles;
+		Audio::Mixer& mixer;
+
 		std::mt19937 randomEngine;
 	};
 }

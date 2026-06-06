@@ -17,5 +17,8 @@ namespace ECS
 
 		float ejectSpeedX = 0.0f;  // horizontal launch speed of dropped fruit
 		float ejectSpeedUp = 0.0f; // upward launch speed of dropped fruit
+
+		std::string hitSound;
+		std::string breakSound;
 	};
 }

@@ -77,6 +77,8 @@ private:
 	bool isRestarting = false;
 
 	bool wasOnGround = false;
+	bool deathSoundPlayed = false;
+	int previousPlayerHealth = -1;
 	int previousJumpsRemaining = 0;
 	float runDustTimer = 0.0f;
 	float previousLockTimer = 0.0f;

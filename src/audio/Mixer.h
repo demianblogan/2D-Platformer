@@ -4,7 +4,7 @@
 #include "audio/SoundPlayer.h"
 
 #include <SFML/System/Vector2.hpp>
-	
+
 #include <string>
 
 struct Resources;
@@ -24,6 +24,10 @@ namespace Audio
 		void RegisterSound(const std::string& name, const std::string& bufferName, float volume = 1.0f);
 		void PlaySound(const std::string& name);
 		void PlaySoundAt(const std::string& name, sf::Vector2f position);
+
+		void StartLoop(const std::string& name);
+		void StopLoop(const std::string& name);
+
 		void SetSoundVolume(float volume);
 
 		void SetListenerPosition(sf::Vector2f position);
