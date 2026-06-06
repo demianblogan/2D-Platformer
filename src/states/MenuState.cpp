@@ -5,6 +5,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "core/Input.h"
 #include "ui/Element.h"
 #include "states/GameState.h"
 
@@ -117,7 +118,32 @@ void MenuState::Update(float deltaTime)
 	userInterface.Update(deltaTime);
 
 	if (transition.GetMode() == Transition::Mode::Idle)
+	{
+		Input& input = context.input;
+
+		if (input.WasPressed(Action::MenuBack))
+		{
+			if (userInterface.IsElementActivated())
+				userInterface.CancelActivation();
+			else
+				pendingRequest = NavRequest::Back;
+		}
+		else if (input.WasPressed(Action::MenuDown))
+		{
+			userInterface.NavigateNext();
+		}
+		else if (input.WasPressed(Action::MenuUp))
+		{
+			userInterface.NavigatePrevious();
+		}
+
+		if (input.WasPressed(Action::MenuConfirm))
+			userInterface.Confirm(true);
+		else if (input.WasReleased(Action::MenuConfirm))
+			userInterface.Confirm(false);
+
 		ApplyPendingNavigation();
+	}
 }
 
 void MenuState::Render(float interpolationFactor)
