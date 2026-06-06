@@ -14,6 +14,7 @@
 #include "graphics/ParticleSystem.h"
 #include "core/DataLoader.h"
 #include "core/ecs/Registry.h"
+#include "audio/Mixer.h"
 
 #include <vector>
 
@@ -25,10 +26,11 @@ namespace ECS
 		constexpr float FRUIT_MAX_FALL_SPEED = 400.0f;
 	}
 
-	BoxSystem::BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles)
+	BoxSystem::BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer)
 		: registry(registry)
 		, loader(loader)
 		, particles(particles)
+		, mixer(mixer)
 		, randomEngine(std::random_device{}())
 	{}
 
@@ -82,6 +84,9 @@ namespace ECS
 
 				if (registry.Has<AnimationState>(entity))
 					registry.Get<AnimationState>(entity).current = "Hit";
+
+				if (!box.hitSound.empty())
+					mixer.PlaySound(box.hitSound);
 
 				if (box.hitsTaken >= box.hitsToBreak)
 					box.isBreaking = true;
@@ -146,6 +151,9 @@ namespace ECS
 				const Transform& debrisTransform = registry.Get<Transform>(entity);
 				particles.EmitDebris({ debrisTransform.x, debrisTransform.y - 12.0f }, box.debrisTexture, 4);
 			}
+
+			if (!box.breakSound.empty())
+				mixer.PlaySound(box.breakSound);
 
 			registry.DestroyEntity(entity); // (debris on break come in Step 2)
 		}

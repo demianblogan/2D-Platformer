@@ -29,6 +29,9 @@ namespace Audio
 		void Play(const std::string& name);
 		void PlayAt(const std::string& name, sf::Vector2f position);
 
+		void StartLoop(const std::string& name);
+		void StopLoop(const std::string& name);
+
 		void SetVolume(float volume);
 		void SetSpatialAttenuation(float minDistance, float attenuation);
 
@@ -46,6 +49,7 @@ namespace Audio
 		sf::SoundBuffer dummyBuffer;
 		std::vector<SoundSlot> pool;
 		std::unordered_map<std::string, SoundConfig> registeredSounds;
+		std::unordered_map<std::string, std::unique_ptr<sf::Sound>> loops;
 		float masterVolume = 1.0f;
 		float spatialMinDistance = 100.0f;
 		float spatialAttenuation = 1.0f;

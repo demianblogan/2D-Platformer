@@ -15,6 +15,7 @@
 #include "tilemap/TilemapLoader.h"
 #include "tilemap/TilemapRenderer.h"
 #include "ui/Label.h"
+#include "audio/Mixer.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -32,7 +33,7 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	, deathSystem(registry)
 	, patrolSystem(registry)
 	, physicsSystem(registry, tilemap)
-	, boxSystem(registry, sceneLoader, particles)
+	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, movementSystem(registry)
 	, pickupSystem(registry, score)
 	, animationSystem(registry)
@@ -79,6 +80,7 @@ GameState::GameState(Context& context, const std::string& levelPath)
 			camera.SnapTo({ transform.x, transform.y });
 			maxHearts = health.maximum;
 			displayedHealth = health.maximum;
+			previousPlayerHealth = health.maximum;
 		});
 
 	hudInterface.SetContent(hudLoader.LoadFromFile("data/ui/hud.json"));
@@ -161,7 +163,11 @@ void GameState::Update(float deltaTime)
 	physicsSystem.Update(deltaTime);
 	boxSystem.Update();
 	movementSystem.Update(deltaTime);
+
+	const int scoreBeforePickup = score;
 	pickupSystem.Update(deltaTime);
+	if (score > scoreBeforePickup)
+		context.audioMixer.PlaySound("fruit_collect");
 
 	playerAnimationSystem.Update();
 	animationSystem.Update(deltaTime);
@@ -198,18 +204,24 @@ void GameState::Update(float deltaTime)
 				runDustTimer = 0.0f;
 			}
 
+			// Looping wall-slide sound only while actually sliding down a wall.
+			const bool isWallSliding = collisionState.isOnWall && !onGround && velocity.y > 0.0f;
+			if (isWallSliding)
+				context.audioMixer.StartLoop("player_wall_slide");
+			else
+				context.audioMixer.StopLoop("player_wall_slide");
+
 			if (previousLockTimer <= 0.0f && jump.lockTimer > 0.0f)
 			{
 				const int pushDirection = (velocity.x > 0.0f) ? 1 : -1;
 				particles.Emit("wall_jump", feet, pushDirection);
+				context.audioMixer.PlaySound("player_jump");
 			}
-			else if (wasOnGround && !onGround && velocity.y < 0.0f)
+			else if (jump.jumpsRemaining < previousJumpsRemaining)
 			{
+				const bool isDoubleJump = (jump.jumpsRemaining == 0);
 				particles.Emit("jump", feet);
-			}
-			else if (!wasOnGround && !onGround && jump.jumpsRemaining < previousJumpsRemaining)
-			{
-				particles.Emit("jump", feet);
+				context.audioMixer.PlaySound(isDoubleJump ? "player_double_jump" : "player_jump");
 			}
 
 			if (!wasOnGround && onGround)
@@ -219,7 +231,19 @@ void GameState::Update(float deltaTime)
 			previousJumpsRemaining = jump.jumpsRemaining;
 			previousLockTimer = jump.lockTimer;
 
-			if (transform.y > fallLimit)
+			const bool fellIntoPit = transform.y > fallLimit;
+
+			if (health.current < previousPlayerHealth && health.current > 0)
+				context.audioMixer.PlaySound("player_hurt");
+			previousPlayerHealth = health.current;
+
+			if (!isRestarting && (health.current <= 0 || fellIntoPit) && !deathSoundPlayed)
+			{
+				context.audioMixer.PlaySound("player_death");
+				deathSoundPlayed = true;
+			}
+
+			if (fellIntoPit)
 			{
 				transition.StartCover();
 				isRestarting = true;

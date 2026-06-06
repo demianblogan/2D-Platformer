@@ -1,20 +1,66 @@
 {
-	"sounds": {
-		"jump": {
-			"path": "assets/audio/sounds/first_jump.ogg",
+	"sounds":
+	{
+		"player_jump":
+		{
+			"path": "assets/audio/sounds/player/first_jump.ogg",
 			"volume": 0.8
 		},
-		"ui_hover": {
+		"player_double_jump":
+		{
+			"path": "assets/audio/sounds/player/second_jump.ogg",
+			"volume": 0.8
+		},
+		"player_wall_slide":
+		{
+			"path": "assets/audio/sounds/player/wall_slide.ogg",
+			"volume": 0.5
+		},
+		"player_hurt":
+		{
+			"path": "assets/audio/sounds/player/hurt.ogg",
+			"volume": 0.8
+		},
+		"player_death":
+		{
+			"path": "assets/audio/sounds/player/death.ogg",
+			"volume": 0.9
+		},
+		"fruit_collect":
+		{
+			"path": "assets/audio/sounds/fruits/collect.ogg",
+			"volume": 0.7
+		},
+		"box_wood_hit":
+		{
+			"path": "assets/audio/sounds/boxes/wood_hit.ogg",
+			"volume": 0.8
+		},
+		"box_metal_hit":
+		{
+			"path": "assets/audio/sounds/boxes/metal_hit.ogg",
+			"volume": 0.8
+		},
+		"box_destroy":
+		{
+			"path": "assets/audio/sounds/boxes/destroy.ogg",
+			"volume": 0.9
+		},
+		"ui_hover":
+		{
 			"path": "assets/audio/sounds/ui_hover.ogg",
 			"volume": 0.5
 		},
-		"ui_press": {
+		"ui_press":
+		{
 			"path": "assets/audio/sounds/ui_press.ogg",
 			"volume": 0.6
 		}
 	},
-	"music": {
-		"menu_theme": {
+	"music":
+	{
+		"menu_theme":
+		{
 			"path": "assets/audio/music/menu.ogg",
 			"loop": true
 		}

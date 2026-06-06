@@ -37,6 +37,8 @@
 		"fruits":
 		[
 		],
-		"debrisTexture": "box_wood_easy_break"
+		"debrisTexture": "box_wood_easy_break",
+		"hitSound": "box_wood_hit",
+		"breakSound": "box_destroy"
 	}
 }

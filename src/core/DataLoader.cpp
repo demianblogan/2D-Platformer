@@ -213,6 +213,9 @@ void DataLoader::RegisterLoaders()
 
 			box.debrisTexture = data.value("debrisTexture", std::string());
 
+			box.hitSound = data.value("hitSound", std::string());
+			box.breakSound = data.value("breakSound", std::string());
+
 			registry.Add<ECS::Box>(entity, box);
 		};
 }

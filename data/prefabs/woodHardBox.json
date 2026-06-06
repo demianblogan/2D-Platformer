@@ -44,6 +44,8 @@
 		],
 		"ejectSpeedX": 70,
 		"ejectSpeedUp": 150,
-		"debrisTexture": "box_wood_hard_break"
+		"debrisTexture": "box_wood_hard_break",
+		"hitSound": "box_wood_hit",
+		"breakSound": "box_destroy"
 	}
 }
