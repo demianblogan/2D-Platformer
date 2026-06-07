@@ -6,6 +6,7 @@
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <string>
@@ -58,4 +59,6 @@ private:
 
 	std::vector<sf::Vector2u> resolutions;
 	int resolutionIndex = 0;
+
+	sf::Color resolutionCaptionColor; // caption color while the resolution row is enabled
 };

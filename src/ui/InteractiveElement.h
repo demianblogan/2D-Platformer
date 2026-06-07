@@ -2,6 +2,7 @@
 
 #include "ui/Element.h"
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <functional>
@@ -32,6 +33,12 @@ namespace UI
 		virtual bool RequiresActivation() const { return false; }
 		bool IsActivated() const { return isActivated; }
 
+		void SetEnabled(bool enabled);
+		bool IsEnabled() const { return isEnabled; }
+
+		void SetDisabledColor(sf::Color color) { disabledColor = color; }
+		sf::Color GetDisabledColor() const { return disabledColor; }
+
 		void SetOnPressed(std::function<void()> callback);
 		void SetOnHighlighted(std::function<void()> callback);
 
@@ -46,10 +53,14 @@ namespace UI
 		virtual void OnStateChanged() {}
 		virtual void OnActivated() {}
 		virtual void OnDeactivated() {}
+		virtual void OnEnabledChanged() {}
 
 
 		InteractionState state = InteractionState::Normal;
 		bool isActivated = false;
+		bool isEnabled = true;
+
+		sf::Color disabledColor = sf::Color(120, 120, 120, 255);
 
 		std::function<void()> onPressed;
 		std::function<void()> onHighlighted;

@@ -4,6 +4,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
+#include <algorithm>
 #include <cmath>
 
 VirtualScreen::VirtualScreen()
@@ -42,37 +43,42 @@ void VirtualScreen::UpdateMousePosition(sf::Vector2i windowPosition, sf::RenderW
 
 void VirtualScreen::RenderToWindow(sf::RenderWindow& window)
 {
-	const sf::Vector2u windowSize = window.getSize();
+	const sf::Vector2f windowSize(window.getSize());
 
-	const unsigned int scaleX = windowSize.x / WIDTH;
-	const unsigned int scaleY = windowSize.y / HEIGHT;
-	const unsigned int scale = std::min(scaleX, scaleY);
+	// Draw with a 1:1 pixel view so positions map directly to window pixels,
+	// regardless of any earlier view change, window resize, or recreation.
+	window.setView(sf::View(sf::FloatRect({ 0.0f, 0.0f }, windowSize)));
 
-	const float scaledWidth = static_cast<float>(WIDTH * scale);
-	const float scaledHeight = static_cast<float>(HEIGHT * scale);
+	// Fractional scale: fill the window as much as possible while keeping the
+	// 16:9 aspect ratio. The leftover space becomes letterbox bars.
+	const float scale = std::min(windowSize.x / WIDTH, windowSize.y / HEIGHT);
+
+	const float scaledWidth = WIDTH * scale;
+	const float scaledHeight = HEIGHT * scale;
 
 	sf::Sprite screenSprite(renderTexture.getTexture());
-	screenSprite.setScale({ static_cast<float>(scale), static_cast<float>(scale) });
+	screenSprite.setScale({ scale, scale });
 	screenSprite.setPosition({
-		(static_cast<float>(windowSize.x) - scaledWidth) / 2.0f,
-		(static_cast<float>(windowSize.y) - scaledHeight) / 2.0f });
+		(windowSize.x - scaledWidth) / 2.0f,
+		(windowSize.y - scaledHeight) / 2.0f });
 
 	window.draw(screenSprite);
 }
 
 sf::Vector2f VirtualScreen::MapWindowToVirtual(sf::Vector2i windowPosition, sf::RenderWindow& window) const
 {
-	const sf::Vector2u windowSize = window.getSize();
+	const sf::Vector2f windowSize(window.getSize());
 
-	const unsigned int scale = std::min(windowSize.x / WIDTH, windowSize.y / HEIGHT);
+	// Must match RenderToWindow exactly, so clicks land on the drawn elements.
+	const float scale = std::min(windowSize.x / WIDTH, windowSize.y / HEIGHT);
 
-	const float scaledWidth = static_cast<float>(WIDTH * scale);
-	const float scaledHeight = static_cast<float>(HEIGHT * scale);
+	const float scaledWidth = WIDTH * scale;
+	const float scaledHeight = HEIGHT * scale;
 
-	const float offsetX = (static_cast<float>(windowSize.x) - scaledWidth) / 2.0f;
-	const float offsetY = (static_cast<float>(windowSize.y) - scaledHeight) / 2.0f;
+	const float offsetX = (windowSize.x - scaledWidth) / 2.0f;
+	const float offsetY = (windowSize.y - scaledHeight) / 2.0f;
 
 	return {
-		(static_cast<float>(windowPosition.x) - offsetX) / static_cast<float>(scale),
-		(static_cast<float>(windowPosition.y) - offsetY) / static_cast<float>(scale) };
+		(static_cast<float>(windowPosition.x) - offsetX) / scale,
+		(static_cast<float>(windowPosition.y) - offsetY) / scale };
 }

@@ -6,6 +6,8 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <algorithm>
+
 namespace UI
 {
 	Root::Root(VirtualScreen& virtualScreen)
@@ -26,29 +28,53 @@ namespace UI
 
 	void Root::CollectInteractives()
 	{
-		highlightedIndex = -1;
+		focusRow = -1;
+		focusColumn = -1;
+		desiredColumn = 0;
 		draggedElement = nullptr;
 		activatedElement = nullptr;
 
-		interactives.clear();
+		rows.clear();
 
 		if (content != nullptr)
-			CollectInteractivesFrom(*content);
+			CollectInteractivesFrom(*content, nullptr);
 
-		if (!interactives.empty())
-		{
-			highlightedIndex = 0;
-			interactives[0]->SetHighlighted(true, false);
-		}
+		ResetFocus();
 	}
 
-	void Root::CollectInteractivesFrom(Element& element)
+	void Root::CollectInteractivesFrom(Element& element, std::vector<InteractiveElement*>* currentRow)
 	{
+		// An interactive element is a navigation leaf: we never descend into it,
+		// so controls built from inner interactives are not collected separately.
 		if (element.IsInteractive())
-			interactives.push_back(static_cast<InteractiveElement*>(&element));
+		{
+			InteractiveElement* interactive = static_cast<InteractiveElement*>(&element);
+
+			if (currentRow != nullptr)
+				currentRow->push_back(interactive);
+			else
+				rows.push_back({ interactive });
+
+			return;
+		}
+
+		// A row container groups all of its interactive descendants into one row.
+		// Rows do not nest: a row flag found inside an existing row is ignored.
+		if (element.isNavigationRow && currentRow == nullptr)
+		{
+			std::vector<InteractiveElement*> row;
+
+			for (Element* child : element.GetChildren())
+				CollectInteractivesFrom(*child, &row);
+
+			if (!row.empty())
+				rows.push_back(std::move(row));
+
+			return;
+		}
 
 		for (Element* child : element.GetChildren())
-			CollectInteractivesFrom(*child);
+			CollectInteractivesFrom(*child, currentRow);
 	}
 
 	void Root::HandleEvent(const sf::Event& event)
@@ -94,32 +120,37 @@ namespace UI
 			return;
 		}
 
-		int foundIndex = -1;
-
-		for (int i = 0; i < static_cast<int>(interactives.size()); i++)
+		for (int row = 0; row < static_cast<int>(rows.size()); row++)
 		{
-			const sf::FloatRect bounds(interactives[i]->GetAbsolutePosition(), interactives[i]->size);
-
-			if (bounds.contains(mouse))
+			for (int column = 0; column < static_cast<int>(rows[row].size()); column++)
 			{
-				foundIndex = i;
-				break;
+				InteractiveElement* element = rows[row][column];
+				if (!element->IsEnabled())
+					continue;
+
+				const sf::FloatRect bounds(element->GetAbsolutePosition(), element->size);
+				if (bounds.contains(mouse))
+				{
+					SetFocus(row, column);
+					desiredColumn = column;
+					return;
+				}
 			}
 		}
 
-		SetHighlightedIndex(foundIndex);
+		ClearFocus();
 	}
 
 	void Root::HandleMousePress()
 	{
-		if (highlightedIndex >= 0)
-		{
-			InteractiveElement* element = interactives[highlightedIndex];
-			element->Press();
+		InteractiveElement* element = CurrentElement();
+		if (element == nullptr || !element->IsEnabled())
+			return;
 
-			draggedElement = element;
-			element->OnDragStart(virtualScreen.GetMousePosition());
-		}
+		element->Press();
+
+		draggedElement = element;
+		element->OnDragStart(virtualScreen.GetMousePosition());
 	}
 
 	void Root::HandleMouseRelease()
@@ -139,28 +170,51 @@ namespace UI
 		}
 	}
 
-	void Root::HandleNavigation(int direction)
+	void Root::MoveRow(int direction)
 	{
-		if (interactives.empty())
+		if (rows.empty())
 			return;
 
-		int newIndex = highlightedIndex;
+		const int rowCount = static_cast<int>(rows.size());
+		int row = (focusRow >= 0) ? focusRow : ((direction > 0) ? -1 : rowCount);
 
-		if (newIndex < 0)
-			newIndex = (direction > 0) ? 0 : static_cast<int>(interactives.size()) - 1;
-		else
-			newIndex = (newIndex + direction + static_cast<int>(interactives.size()))
-			% static_cast<int>(interactives.size());
+		for (int step = 0; step < rowCount; step++)
+		{
+			row = (row + direction + rowCount) % rowCount;
 
-		SetHighlightedIndex(newIndex);
+			const int column = FirstEnabledColumn(row, desiredColumn);
+			if (column >= 0)
+			{
+				SetFocus(row, column);
+				return;
+			}
+		}
+	}
+
+	void Root::MoveColumn(int direction)
+	{
+		if (focusRow < 0 || focusRow >= static_cast<int>(rows.size()))
+			return;
+
+		const std::vector<InteractiveElement*>& cells = rows[focusRow];
+
+		// Step toward the row edge, skipping disabled cells. No wrap inside a row.
+		for (int next = focusColumn + direction; next >= 0 && next < static_cast<int>(cells.size()); next += direction)
+		{
+			if (cells[next]->IsEnabled())
+			{
+				SetFocus(focusRow, next);
+				desiredColumn = next;
+				return;
+			}
+		}
 	}
 
 	void Root::HandleConfirm(bool pressed)
 	{
-		if (highlightedIndex < 0)
+		InteractiveElement* element = CurrentElement();
+		if (element == nullptr || !element->IsEnabled())
 			return;
-
-		InteractiveElement* element = interactives[highlightedIndex];
 
 		if (pressed)
 		{
@@ -170,10 +224,15 @@ namespace UI
 		{
 			element->Release();
 
-			if (element->RequiresActivation() && !element->IsActivated())
+			if (element->RequiresActivation())
 			{
-				activatedElement = element;
-				element->Activate();
+				if (element->IsActivated())
+					DeactivateCurrent(); // Confirm toggles the selection off
+				else
+				{
+					activatedElement = element;
+					element->Activate();
+				}
 			}
 		}
 	}
@@ -187,18 +246,82 @@ namespace UI
 		}
 	}
 
-	void Root::SetHighlightedIndex(int index)
+	InteractiveElement* Root::CurrentElement() const
 	{
-		if (index == highlightedIndex)
+		if (focusRow < 0 || focusRow >= static_cast<int>(rows.size()))
+			return nullptr;
+		if (focusColumn < 0 || focusColumn >= static_cast<int>(rows[focusRow].size()))
+			return nullptr;
+
+		return rows[focusRow][focusColumn];
+	}
+
+	int Root::FirstEnabledColumn(int row, int preferredColumn) const
+	{
+		if (row < 0 || row >= static_cast<int>(rows.size()))
+			return -1;
+
+		const std::vector<InteractiveElement*>& cells = rows[row];
+		if (cells.empty())
+			return -1;
+
+		const int clamped = std::clamp(preferredColumn, 0, static_cast<int>(cells.size()) - 1);
+		if (cells[clamped]->IsEnabled())
+			return clamped;
+
+		// Search outward from the preferred column for the nearest enabled cell.
+		for (int distance = 1; distance < static_cast<int>(cells.size()); distance++)
+		{
+			const int right = clamped + distance;
+			const int left = clamped - distance;
+
+			if (right < static_cast<int>(cells.size()) && cells[right]->IsEnabled())
+				return right;
+			if (left >= 0 && cells[left]->IsEnabled())
+				return left;
+		}
+
+		return -1;
+	}
+
+	void Root::SetFocus(int row, int column, bool playSound)
+	{
+		if (row == focusRow && column == focusColumn)
 			return;
 
-		if (highlightedIndex >= 0)
-			interactives[highlightedIndex]->SetHighlighted(false);
+		if (InteractiveElement* previous = CurrentElement())
+			previous->SetHighlighted(false);
 
-		highlightedIndex = index;
+		focusRow = row;
+		focusColumn = column;
 
-		if (highlightedIndex >= 0)
-			interactives[highlightedIndex]->SetHighlighted(true);
+		if (InteractiveElement* current = CurrentElement())
+			current->SetHighlighted(true, playSound);
+	}
+
+	void Root::ClearFocus()
+	{
+		if (InteractiveElement* current = CurrentElement())
+			current->SetHighlighted(false);
+
+		focusRow = -1;
+		focusColumn = -1;
+	}
+
+	void Root::ResetFocus()
+	{
+		ClearFocus();
+
+		for (int row = 0; row < static_cast<int>(rows.size()); row++)
+		{
+			const int column = FirstEnabledColumn(row, 0);
+			if (column >= 0)
+			{
+				SetFocus(row, column, false);
+				desiredColumn = column;
+				return;
+			}
+		}
 	}
 
 	void Root::Update(float deltaTime)
@@ -214,22 +337,34 @@ namespace UI
 				{ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
 	}
 
+	void Root::NavigateUp()
+	{
+		activeMode = InputMode::Selection;
+		MoveRow(-1);
+	}
+
+	void Root::NavigateDown()
+	{
+		activeMode = InputMode::Selection;
+		MoveRow(1);
+	}
+
+	void Root::NavigateLeft()
+	{
+		activeMode = InputMode::Selection;
+		MoveColumn(-1);
+	}
+
+	void Root::NavigateRight()
+	{
+		activeMode = InputMode::Selection;
+		MoveColumn(1);
+	}
+
 	void Root::NavigateValue(int direction)
 	{
 		if (activatedElement != nullptr)
 			activatedElement->OnNavigate(direction);
-	}
-
-	void Root::NavigateNext()
-	{
-		activeMode = InputMode::Selection;
-		HandleNavigation(1);
-	}
-
-	void Root::NavigatePrevious()
-	{
-		activeMode = InputMode::Selection;
-		HandleNavigation(-1);
 	}
 
 	void Root::Confirm(bool pressed)

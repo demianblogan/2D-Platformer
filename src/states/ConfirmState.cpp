@@ -67,9 +67,9 @@ void ConfirmState::Update(float deltaTime)
 	}
 
 	if (input.WasPressed(Action::MenuRight) || input.WasPressed(Action::MenuDown))
-		dialog.NavigateNext();
+		dialog.NavigateDown();
 	else if (input.WasPressed(Action::MenuLeft) || input.WasPressed(Action::MenuUp))
-		dialog.NavigatePrevious();
+		dialog.NavigateUp();
 
 	if (input.WasPressed(Action::MenuConfirm))
 		dialog.Confirm(true);

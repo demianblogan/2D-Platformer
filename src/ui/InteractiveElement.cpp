@@ -24,6 +24,9 @@ namespace UI
 
 	void InteractiveElement::Press()
 	{
+		if (!isEnabled)
+			return;
+
 		if (state != InteractionState::Pressed)
 		{
 			state = InteractionState::Pressed;
@@ -61,6 +64,22 @@ namespace UI
 			isActivated = false;
 			OnDeactivated();
 		}
+	}
+
+	void InteractiveElement::SetEnabled(bool enabled)
+	{
+		if (isEnabled == enabled)
+			return;
+
+		isEnabled = enabled;
+
+		// A disabled element must not look highlighted or pressed. Activation is
+		// owned by Root, so we leave it untouched here.
+		if (!isEnabled)
+			state = InteractionState::Normal;
+
+		OnStateChanged();
+		OnEnabledChanged();
 	}
 
 	void InteractiveElement::SetOnPressed(std::function<void()> callback)
