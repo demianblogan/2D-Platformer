@@ -2,9 +2,12 @@
 
 #include "ui/InteractiveElement.h"
 
+#include <SFML/Graphics/Color.hpp>
+
 #include <array>
 #include <functional>
 #include <memory>
+#include <optional>
 
 namespace UI
 {
@@ -16,6 +19,10 @@ namespace UI
 		void SetBackground(InteractionState state, std::unique_ptr<Element> element);
 		void SetCheckedView(std::unique_ptr<Element> element);
 		void SetUncheckedView(std::unique_ptr<Element> element);
+
+		// Optional tint applied to the visible view per interaction state, so the
+		// checkbox shows focus/hover (e.g. dimmer when idle, brighter when focused).
+		void SetViewColor(InteractionState state, sf::Color color);
 
 		void SetChecked(bool checked);
 		bool IsChecked() const { return isChecked; }
@@ -34,6 +41,8 @@ namespace UI
 		std::array<Element*, INTERACTION_STATE_COUNT> backgrounds = { nullptr, nullptr, nullptr };
 		Element* checkedView = nullptr;
 		Element* uncheckedView = nullptr;
+
+		std::array<std::optional<sf::Color>, INTERACTION_STATE_COUNT> viewColors = {};
 
 		bool isChecked = false;
 		std::function<void(bool)> onCheckedChanged;

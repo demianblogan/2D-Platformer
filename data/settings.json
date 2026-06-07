@@ -2,5 +2,12 @@
 	"audio": {
 		"music": 5,
 		"sound": 5
+	},
+	"graphics": {
+		"height": 1080,
+		"screenMode": "borderless",
+		"showFps": true,
+		"vsync": true,
+		"width": 1920
 	}
 }

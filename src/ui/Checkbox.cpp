@@ -46,6 +46,12 @@ namespace UI
 		RefreshVisibility();
 	}
 
+	void Checkbox::SetViewColor(InteractionState state, sf::Color color)
+	{
+		viewColors[StateToIndex(state)] = color;
+		RefreshVisibility();
+	}
+
 	void Checkbox::SetChecked(bool checked)
 	{
 		if (isChecked == checked)
@@ -85,6 +91,15 @@ namespace UI
 			checkedView->isVisible = isChecked;
 		if (uncheckedView != nullptr)
 			uncheckedView->isVisible = !isChecked;
+
+		// Tint whichever view is shown, so the checkbox reflects focus/hover.
+		Element* activeView = isChecked ? checkedView : uncheckedView;
+		if (activeView != nullptr)
+		{
+			const std::optional<sf::Color>& tint = viewColors[StateToIndex(state)];
+			if (tint.has_value())
+				activeView->SetColor(tint.value());
+		}
 	}
 
 	Element* Checkbox::GetBackgroundForState(InteractionState state) const

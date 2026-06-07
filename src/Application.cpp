@@ -224,7 +224,7 @@ void Application::DrawCursor()
 	const sf::Vector2i mouse = sf::Mouse::getPosition(window);
 
 	sf::Sprite cursor(resources.textures.Get("cursor"));
-	cursor.setScale({ scale, scale });
+	cursor.setScale({ scale * 0.5f, scale * 0.5f });
 	cursor.setPosition({ std::floor(static_cast<float>(mouse.x)), std::floor(static_cast<float>(mouse.y)) });
 
 	window.draw(cursor);

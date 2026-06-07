@@ -14,6 +14,7 @@
 #include "ui/Element.h"
 #include "ui/Label.h"
 #include "ui/Slider.h"
+#include "ui/Stepper.h"
 #include "core/GraphicsTarget.h"
 
 #include <SFML/Graphics/Color.hpp>
@@ -122,6 +123,8 @@ void MenuState::ShowPanel(const std::string& panelId)
 		SetupAudioPanel();
 	else if (panelId == "graphics")
 		SetupGraphicsPanel();
+
+	userInterface.ResetFocus();
 }
 
 void MenuState::SetupAudioPanel()
@@ -151,16 +154,24 @@ void MenuState::SetupGraphicsPanel()
 	const sf::Vector2u current(static_cast<unsigned int>(context.settings.GetResolutionWidth()),
 		static_cast<unsigned int>(context.settings.GetResolutionHeight()));
 
+	if (std::find(resolutions.begin(), resolutions.end(), current) == resolutions.end())
+		resolutions.push_back(current);
+
+	// Ascending order, so "next" (+1) means a bigger resolution: the right arrow
+	// now increases the resolution as expected.
+	std::sort(resolutions.begin(), resolutions.end(),
+		[](const sf::Vector2u& a, const sf::Vector2u& b)
+		{
+			if (a.x != b.x)
+				return a.x < b.x;
+			return a.y < b.y;
+		});
+
 	const auto found = std::find(resolutions.begin(), resolutions.end(), current);
-	if (found != resolutions.end())
-	{
-		resolutionIndex = static_cast<int>(std::distance(resolutions.begin(), found));
-	}
-	else
-	{
-		resolutions.insert(resolutions.begin(), current);
-		resolutionIndex = 0;
-	}
+	resolutionIndex = static_cast<int>(std::distance(resolutions.begin(), found));
+
+	if (auto* caption = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_caption")))
+		resolutionCaptionColor = caption->GetColor();
 
 	UpdateResolutionLabel();
 	UpdateScreenModeLabel();
@@ -227,12 +238,18 @@ void MenuState::UpdateScreenModeLabel()
 void MenuState::UpdateResolutionRowEnabled()
 {
 	const bool enabled = context.settings.GetScreenMode() != ScreenMode::Borderless;
-	const sf::Color color = enabled ? sf::Color(226, 210, 255, 255) : sf::Color(120, 120, 120, 255);
+
+	// The stepper grays its own arrows and value text (disabled color comes from
+	// its data). Here we only need to mirror that on the separate caption label.
+	auto* stepper = dynamic_cast<UI::Stepper*>(userInterface.FindByName("resolution_stepper"));
+	if (stepper != nullptr)
+		stepper->SetEnabled(enabled);
 
 	if (auto* caption = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_caption")))
-		caption->SetColor(color);
-	if (auto* value = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_value")))
-		value->SetColor(color);
+	{
+		const sf::Color disabledColor = (stepper != nullptr) ? stepper->GetDisabledColor() : caption->GetColor();
+		caption->SetColor(enabled ? resolutionCaptionColor : disabledColor);
+	}
 }
 
 bool MenuState::IsSettingsPanel(const std::string& panelId) const
@@ -341,30 +358,26 @@ void MenuState::Update(float deltaTime)
 	if (transition.GetMode() == Transition::Mode::Idle)
 	{
 		Input& input = context.input;
-		const bool activated = userInterface.IsElementActivated();
 
 		if (input.WasPressed(Action::MenuBack))
 		{
-			if (activated)
-				userInterface.CancelActivation();
-			else
-				pendingRequest = NavRequest::Back;
+			pendingRequest = NavRequest::Back;
 		}
-		else if (!activated && input.WasPressed(Action::MenuDown))
+		else if (input.WasPressed(Action::MenuDown))
 		{
-			userInterface.NavigateNext();
+			userInterface.NavigateDown();
 		}
-		else if (!activated && input.WasPressed(Action::MenuUp))
+		else if (input.WasPressed(Action::MenuUp))
 		{
-			userInterface.NavigatePrevious();
+			userInterface.NavigateUp();
 		}
-
-		if (activated)
+		else if (input.WasPressed(Action::MenuLeft))
 		{
-			if (input.WasPressed(Action::MenuLeft))
-				userInterface.NavigateValue(-1);
-			else if (input.WasPressed(Action::MenuRight))
-				userInterface.NavigateValue(1);
+			userInterface.NavigateLeft();
+		}
+		else if (input.WasPressed(Action::MenuRight))
+		{
+			userInterface.NavigateRight();
 		}
 
 		if (input.WasPressed(Action::MenuConfirm))

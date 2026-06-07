@@ -51,6 +51,11 @@ namespace UI
 
 		bool isVisible = true;
 
+		// When true, this element's interactive descendants form one navigation row
+		// (left/right move between them, up/down leave the row).
+		bool isNavigationRow = false;
+
+	protected:
 	protected:
 		sf::Vector2f ComputePosition(sf::Vector2f parentPosition, sf::Vector2f parentSize) const;
 

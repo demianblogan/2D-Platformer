@@ -197,91 +197,29 @@
 							}
 						},
 						{
-							"Button":
+							"Stepper":
 							{
-								"prefab": "arrow_left_button",
-								"name": "resolution_left",
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
-								"offset":
-								[
-									40,
-									0
-								],
-								"action": "resolution_prev"
-							}
-						},
-						{
-							"Label":
-							{
-								"name": "resolution_value",
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
+								"prefab": "stepper",
+								"name": "resolution_stepper",
 								"offset":
 								[
 									110,
 									0
 								],
-								"fontName": "main",
-								"characterSize": 16,
-								"color":
-								[
-									226,
-									210,
-									255,
-									255
-								],
-								"outlineColor":
-								[
-									45,
-									30,
-									60,
-									255
-								],
-								"outlineThickness": 1,
-								"text": "1920 x 1080"
-							}
-						},
-						{
-							"Button":
-							{
-								"prefab": "arrow_right_button",
-								"name": "resolution_right",
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
-								"offset":
-								[
-									180,
-									0
-								],
-								"action": "resolution_next"
+								"valueLabel":
+								{
+									"Label":
+									{
+										"name": "resolution_value",
+										"text": "1920 x 1080"
+									}
+								},
+								"actionPrev": "resolution_prev",
+								"actionNext": "resolution_next"
 							}
 						}
-					]
+					],
+					"row": true
 				}
 			},
 			{
@@ -375,91 +313,29 @@
 							}
 						},
 						{
-							"Button":
+							"Stepper":
 							{
-								"prefab": "arrow_left_button",
-								"name": "screenmode_left",
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
-								"offset":
-								[
-									40,
-									0
-								],
-								"action": "screenmode_prev"
-							}
-						},
-						{
-							"Label":
-							{
-								"name": "screenmode_value",
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
+								"prefab": "stepper",
+								"name": "screenmode_stepper",
 								"offset":
 								[
 									110,
 									0
 								],
-								"fontName": "main",
-								"characterSize": 16,
-								"color":
-								[
-									226,
-									210,
-									255,
-									255
-								],
-								"outlineColor":
-								[
-									45,
-									30,
-									60,
-									255
-								],
-								"outlineThickness": 1,
-								"text": "Borderless"
-							}
-						},
-						{
-							"Button":
-							{
-								"prefab": "arrow_right_button",
-								"name": "screenmode_right",
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
-								"offset":
-								[
-									180,
-									0
-								],
-								"action": "screenmode_next"
+								"valueLabel":
+								{
+									"Label":
+									{
+										"name": "screenmode_value",
+										"text": "Borderless"
+									}
+								},
+								"actionPrev": "screenmode_prev",
+								"actionNext": "screenmode_next"
 							}
 						}
-					]
+					],
+					"row": true
 				}
 			},
 			{
@@ -575,7 +451,8 @@
 								"action": "set_vsync"
 							}
 						}
-					]
+					],
+					"row": true
 				}
 			},
 			{
@@ -691,80 +568,110 @@
 								"action": "set_showfps"
 							}
 						}
+					],
+					"row": true
+				}
+			},
+			{
+				"Element":
+				{
+					"row": true,
+					"anchor":
+					[
+						0,
+						0
+					],
+					"pivot":
+					[
+						0,
+						0
+					],
+					"offset":
+					[
+						0,
+						0
+					],
+					"size":
+					[
+						480,
+						270
+					],
+					"children":
+					[
+						{
+							"Button":
+							{
+								"prefab": "menu_button",
+								"name": "save_button",
+								"anchor":
+								[
+									0.5,
+									0.5
+								],
+								"pivot":
+								[
+									0.5,
+									0.5
+								],
+								"offset":
+								[
+									-72,
+									66
+								],
+								"backgroundTint":
+								[
+									120,
+									200,
+									120,
+									255
+								],
+								"action": "menu_save",
+								"foregrounds":
+								{
+									"Normal":
+									{
+										"Label":
+										{
+											"text": "Save"
+										}
+									}
+								}
+							}
+						},
+						{
+							"Button":
+							{
+								"prefab": "menu_button",
+								"name": "back_button",
+								"anchor":
+								[
+									0.5,
+									0.5
+								],
+								"pivot":
+								[
+									0.5,
+									0.5
+								],
+								"offset":
+								[
+									72,
+									66
+								],
+								"action": "menu_back",
+								"foregrounds":
+								{
+									"Normal":
+									{
+										"Label":
+										{
+											"text": "Back"
+										}
+									}
+								}
+							}
+						}
 					]
-				}
-			},
-			{
-				"Button":
-				{
-					"prefab": "menu_button",
-					"name": "save_button",
-					"anchor":
-					[
-						0.5,
-						0.5
-					],
-					"pivot":
-					[
-						0.5,
-						0.5
-					],
-					"offset":
-					[
-						-72,
-						66
-					],
-					"backgroundTint":
-					[
-						120,
-						200,
-						120,
-						255
-					],
-					"action": "menu_save",
-					"foregrounds":
-					{
-						"Normal":
-						{
-							"Label":
-							{
-								"text": "Save"
-							}
-						}
-					}
-				}
-			},
-			{
-				"Button":
-				{
-					"prefab": "menu_button",
-					"name": "back_button",
-					"anchor":
-					[
-						0.5,
-						0.5
-					],
-					"pivot":
-					[
-						0.5,
-						0.5
-					],
-					"offset":
-					[
-						72,
-						66
-					],
-					"action": "menu_back",
-					"foregrounds":
-					{
-						"Normal":
-						{
-							"Label":
-							{
-								"text": "Back"
-							}
-						}
-					}
 				}
 			}
 		]

@@ -8,6 +8,7 @@
 #include "ui/InteractiveElement.h"
 #include "ui/Label.h"
 #include "ui/Slider.h"
+#include "ui/Stepper.h"
 #include "ui/TextField.h"
 
 #include <SFML/Graphics/Color.hpp>
@@ -33,6 +34,10 @@ namespace UI
 				element.offset = { data["offset"][0], data["offset"][1] };
 			if (data.contains("isVisible"))
 				element.isVisible = data["isVisible"];
+			if (data.contains("isVisible"))
+				element.isVisible = data["isVisible"];
+			if (data.contains("row"))
+				element.isNavigationRow = data["row"];
 		}
 
 		sf::Color ParseColor(const nlohmann::json& data)
@@ -329,10 +334,16 @@ namespace UI
 					checkbox->SetCheckedView(loader.LoadElement(data["checkedView"]));
 				if (data.contains("uncheckedView"))
 					checkbox->SetUncheckedView(loader.LoadElement(data["uncheckedView"]));
-
+				if (data.contains("viewColors"))
+				{
+					for (const auto& [stateName, colorData] : data["viewColors"].items())
+					{
+						const InteractionState state = ParseInteractionState(stateName);
+						checkbox->SetViewColor(state, ParseColor(colorData));
+					}
+				}
 				if (data.contains("checked"))
 					checkbox->SetChecked(data["checked"]);
-
 				if (data.contains("action"))
 				{
 					const std::string actionName = data["action"];
@@ -382,6 +393,80 @@ namespace UI
 				}
 
 				return slider;
+			};
+
+		factories["Stepper"] = [](DataLoader& loader, const nlohmann::json& data) -> std::unique_ptr<Element>
+			{
+				auto stepper = std::make_unique<Stepper>();
+				ApplyCommonFields(*stepper, data);
+
+				if (data.contains("leftArrowNormal"))
+					stepper->SetLeftArrowNormal(loader.LoadElement(data["leftArrowNormal"]));
+				if (data.contains("leftArrowPressed"))
+					stepper->SetLeftArrowPressed(loader.LoadElement(data["leftArrowPressed"]));
+				if (data.contains("rightArrowNormal"))
+					stepper->SetRightArrowNormal(loader.LoadElement(data["rightArrowNormal"]));
+				if (data.contains("rightArrowPressed"))
+					stepper->SetRightArrowPressed(loader.LoadElement(data["rightArrowPressed"]));
+				if (data.contains("valueLabel"))
+					stepper->SetValueLabel(loader.LoadElement(data["valueLabel"]));
+
+				if (data.contains("arrowColors"))
+				{
+					for (const auto& [stateName, colorData] : data["arrowColors"].items())
+					{
+						const InteractionState state = ParseInteractionState(stateName);
+						stepper->SetArrowColor(state, ParseColor(colorData));
+					}
+				}
+
+				if (data.contains("valueLabel") && data["valueLabel"].begin().value().contains("color"))
+					stepper->SetValueColor(ParseColor(data["valueLabel"].begin().value()["color"]));
+
+				if (data.contains("disabledColor"))
+					stepper->SetDisabledColor(ParseColor(data["disabledColor"]));
+
+				std::function<void()> stepLeft;
+				std::function<void()> stepRight;
+				if (data.contains("actionPrev"))
+					stepLeft = loader.FindAction(data["actionPrev"]);
+				if (data.contains("actionNext"))
+					stepRight = loader.FindAction(data["actionNext"]);
+
+				if (loader.buttonSoundMixer != nullptr)
+				{
+					Audio::Mixer* mixer = loader.buttonSoundMixer;
+					const std::string hoverSound = loader.buttonHoverSound;
+					const std::string pressSound = loader.buttonPressSound;
+
+					if (!hoverSound.empty())
+						stepper->SetOnHighlighted([mixer, hoverSound] { mixer->PlaySound(hoverSound); });
+
+					stepper->SetOnStepLeft([mixer, pressSound, stepLeft]
+						{
+							if (!pressSound.empty())
+								mixer->PlaySound(pressSound);
+							if (stepLeft)
+								stepLeft();
+						});
+
+					stepper->SetOnStepRight([mixer, pressSound, stepRight]
+						{
+							if (!pressSound.empty())
+								mixer->PlaySound(pressSound);
+							if (stepRight)
+								stepRight();
+						});
+				}
+				else
+				{
+					if (stepLeft)
+						stepper->SetOnStepLeft(std::move(stepLeft));
+					if (stepRight)
+						stepper->SetOnStepRight(std::move(stepRight));
+				}
+
+				return stepper;
 			};
 
 		factories["TextField"] = [](DataLoader& loader, const nlohmann::json& data) -> std::unique_ptr<Element>
