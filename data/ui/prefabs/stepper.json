@@ -20,9 +20,9 @@
 		{
 			"Normal":
 			[
-				180,
-				180,
-				180,
+				200,
+				200,
+				200,
 				255
 			],
 			"Highlighted":
@@ -30,13 +30,6 @@
 				255,
 				255,
 				255,
-				255
-			],
-			"Pressed":
-			[
-				255,
-				230,
-				150,
 				255
 			]
 		},
@@ -47,14 +40,14 @@
 			120,
 			255
 		],
-		"leftArrow":
+		"leftArrowNormal":
 		{
 			"Image":
 			{
 				"size":
 				[
 					14,
-					24
+					20
 				],
 				"anchor":
 				[
@@ -71,17 +64,44 @@
 					0,
 					0
 				],
-				"textureName": "arrow_left"
+				"textureName": "arrow_left_normal"
 			}
 		},
-		"rightArrow":
+		"leftArrowPressed":
 		{
 			"Image":
 			{
 				"size":
 				[
 					14,
-					24
+					20
+				],
+				"anchor":
+				[
+					0,
+					0.5
+				],
+				"pivot":
+				[
+					0,
+					0.5
+				],
+				"offset":
+				[
+					0,
+					0
+				],
+				"textureName": "arrow_left_pressed"
+			}
+		},
+		"rightArrowNormal":
+		{
+			"Image":
+			{
+				"size":
+				[
+					14,
+					20
 				],
 				"anchor":
 				[
@@ -98,7 +118,34 @@
 					0,
 					0
 				],
-				"textureName": "arrow_right"
+				"textureName": "arrow_right_normal"
+			}
+		},
+		"rightArrowPressed":
+		{
+			"Image":
+			{
+				"size":
+				[
+					14,
+					20
+				],
+				"anchor":
+				[
+					1,
+					0.5
+				],
+				"pivot":
+				[
+					1,
+					0.5
+				],
+				"offset":
+				[
+					0,
+					0
+				],
+				"textureName": "arrow_right_pressed"
 			}
 		},
 		"valueLabel":

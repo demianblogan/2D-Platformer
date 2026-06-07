@@ -23,7 +23,7 @@ namespace UI
 
 		void SetOnValueChanged(std::function<void(float)> callback);
 
-		bool RequiresActivation() const override { return true; }
+		bool IsValueControl() const override { return true; }
 
 		void OnDragStart(sf::Vector2f mousePosition) override;
 		void OnDragMove(sf::Vector2f mousePosition) override;

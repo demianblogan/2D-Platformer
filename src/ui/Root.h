@@ -42,11 +42,8 @@ namespace UI
 		void NavigateDown();
 		void NavigateLeft();
 		void NavigateRight();
-		void NavigateValue(int direction);
 		void Confirm(bool pressed);
-		void CancelActivation();
 		void ResetFocus();
-		bool IsElementActivated() const { return activatedElement != nullptr; }
 
 	private:
 		void CollectInteractives();
@@ -62,7 +59,7 @@ namespace UI
 
 		void SetFocus(int row, int column, bool playSound = true);
 		void ClearFocus();
-		void DeactivateCurrent();
+		void DeactivateFocused();
 
 		InteractiveElement* CurrentElement() const;
 		int FirstEnabledColumn(int row, int preferredColumn) const;

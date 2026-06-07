@@ -30,7 +30,11 @@ namespace UI
 		void Activate();
 		void Deactivate();
 
-		virtual bool RequiresActivation() const { return false; }
+		// True for controls whose value is changed with left/right (slider, stepper).
+		// Such a control is auto-activated while focused, so left/right adjust it
+		// directly instead of moving between sibling elements.
+		virtual bool IsValueControl() const { return false; }
+		
 		bool IsActivated() const { return isActivated; }
 
 		void SetEnabled(bool enabled);

@@ -89,16 +89,6 @@ namespace UI
 		if (event.getIf<sf::Event::MouseButtonPressed>())
 		{
 			activeMode = InputMode::Cursor;
-
-			if (activatedElement != nullptr)
-			{
-				const sf::Vector2f mouse = virtualScreen.GetMousePosition();
-				const sf::FloatRect activatedBounds(activatedElement->GetAbsolutePosition(), activatedElement->size);
-
-				if (!activatedBounds.contains(mouse))
-					DeactivateCurrent();
-			}
-
 			HandleMousePress();
 			return;
 		}
@@ -159,13 +149,6 @@ namespace UI
 		{
 			draggedElement->OnDragEnd();
 			draggedElement->Release();
-
-			if (draggedElement->RequiresActivation() && !draggedElement->IsActivated())
-			{
-				activatedElement = draggedElement;
-				draggedElement->Activate();
-			}
-
 			draggedElement = nullptr;
 		}
 	}
@@ -216,28 +199,18 @@ namespace UI
 		if (element == nullptr || !element->IsEnabled())
 			return;
 
-		if (pressed)
-		{
-			element->Press();
-		}
-		else
-		{
-			element->Release();
+		// Value controls (slider/stepper) ignore Confirm: they are adjusted with
+		// left/right while focused, never "entered".
+		if (element->IsValueControl())
+			return;
 
-			if (element->RequiresActivation())
-			{
-				if (element->IsActivated())
-					DeactivateCurrent(); // Confirm toggles the selection off
-				else
-				{
-					activatedElement = element;
-					element->Activate();
-				}
-			}
-		}
+		if (pressed)
+			element->Press();
+		else
+			element->Release(); // fires the button action
 	}
 
-	void Root::DeactivateCurrent()
+	void Root::DeactivateFocused()
 	{
 		if (activatedElement != nullptr)
 		{
@@ -290,19 +263,39 @@ namespace UI
 			return;
 
 		if (InteractiveElement* previous = CurrentElement())
+		{
 			previous->SetHighlighted(false);
+
+			if (previous == activatedElement)
+				DeactivateFocused();
+		}
 
 		focusRow = row;
 		focusColumn = column;
 
 		if (InteractiveElement* current = CurrentElement())
+		{
 			current->SetHighlighted(true, playSound);
+
+			// A focused value control auto-activates so left/right adjust it and
+			// it shows its selected visual without a separate "enter" step.
+			if (current->IsValueControl())
+			{
+				current->Activate();
+				activatedElement = current;
+			}
+		}
 	}
 
 	void Root::ClearFocus()
 	{
 		if (InteractiveElement* current = CurrentElement())
+		{
 			current->SetHighlighted(false);
+
+			if (current == activatedElement)
+				DeactivateFocused();
+		}
 
 		focusRow = -1;
 		focusColumn = -1;
@@ -352,29 +345,28 @@ namespace UI
 	void Root::NavigateLeft()
 	{
 		activeMode = InputMode::Selection;
-		MoveColumn(-1);
+
+		InteractiveElement* element = CurrentElement();
+		if (element != nullptr && element->IsEnabled() && element->IsValueControl())
+			element->OnNavigate(-1);
+		else
+			MoveColumn(-1);
 	}
 
 	void Root::NavigateRight()
 	{
 		activeMode = InputMode::Selection;
-		MoveColumn(1);
-	}
 
-	void Root::NavigateValue(int direction)
-	{
-		if (activatedElement != nullptr)
-			activatedElement->OnNavigate(direction);
+		InteractiveElement* element = CurrentElement();
+		if (element != nullptr && element->IsEnabled() && element->IsValueControl())
+			element->OnNavigate(1);
+		else
+			MoveColumn(1);
 	}
 
 	void Root::Confirm(bool pressed)
 	{
 		activeMode = InputMode::Selection;
 		HandleConfirm(pressed);
-	}
-
-	void Root::CancelActivation()
-	{
-		DeactivateCurrent();
 	}
 }

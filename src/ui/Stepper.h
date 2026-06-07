@@ -10,13 +10,16 @@
 
 namespace UI
 {
-	// A "left value right" control. Like a slider, it must be activated before the
-	// keyboard left/right step it; the arrow images stay clickable with the mouse.
+	// A "left value right" control. It is a value control, so while focused the
+	// left/right keys step it directly. Each arrow has a normal image (tinted
+	// brighter on hover) and a pressed image shown while that arrow is clicked.
 	class Stepper : public InteractiveElement
 	{
 	public:
-		void SetLeftArrow(std::unique_ptr<Element> element);
-		void SetRightArrow(std::unique_ptr<Element> element);
+		void SetLeftArrowNormal(std::unique_ptr<Element> element);
+		void SetLeftArrowPressed(std::unique_ptr<Element> element);
+		void SetRightArrowNormal(std::unique_ptr<Element> element);
+		void SetRightArrowPressed(std::unique_ptr<Element> element);
 		void SetValueLabel(std::unique_ptr<Element> element);
 
 		void SetArrowColor(InteractionState state, sf::Color color);
@@ -25,11 +28,13 @@ namespace UI
 		void SetOnStepLeft(std::function<void()> callback);
 		void SetOnStepRight(std::function<void()> callback);
 
-		bool RequiresActivation() const override { return true; }
+		bool IsValueControl() const override { return true; }
 
 		void OnDragStart(sf::Vector2f mousePosition) override;
 		void OnDragEnd() override;
 		void OnNavigate(int direction) override;
+
+		void Update(float deltaTime) override;
 
 	protected:
 		void OnStateChanged() override;
@@ -43,13 +48,17 @@ namespace UI
 			Right
 		};
 
-		void RefreshColors();
-		sf::Color ColorForArrow(PressedArrow arrow) const;
+		void Refresh();
+		sf::Color CurrentArrowTint() const;
 
-		Element* leftArrow = nullptr;
-		Element* rightArrow = nullptr;
+		Element* leftArrowNormal = nullptr;
+		Element* leftArrowPressed = nullptr;
+		Element* rightArrowNormal = nullptr;
+		Element* rightArrowPressed = nullptr;
 		Element* valueLabel = nullptr;
 
+		// Only Normal and Highlighted tints are used; Pressed is shown by swapping
+		// to the pressed image instead of tinting.
 		std::array<sf::Color, INTERACTION_STATE_COUNT> arrowColors =
 		{
 			sf::Color::White,
@@ -59,6 +68,7 @@ namespace UI
 		sf::Color valueColor = sf::Color::White;
 
 		PressedArrow pressedArrow = PressedArrow::None;
+		float pressedTimer = 0.0f; // brief flash of the pressed image on keyboard step
 
 		std::function<void()> onStepLeft;
 		std::function<void()> onStepRight;

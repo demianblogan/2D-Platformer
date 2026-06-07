@@ -3,94 +3,29 @@
 	{
 		"size":
 		[
-			18,
-			18
+			22,
+			22
 		],
-		"backgrounds":
+		"uncheckedView":
 		{
-			"Normal":
+			"Image":
 			{
-				"Image":
-				{
-					"anchor":
-					[
-						0.5,
-						0.5
-					],
-					"pivot":
-					[
-						0.5,
-						0.5
-					],
-					"size":
-					[
-						18,
-						18
-					],
-					"color":
-					[
-						80,
-						50,
-						110,
-						255
-					]
-				}
-			},
-			"Highlighted":
-			{
-				"Image":
-				{
-					"anchor":
-					[
-						0.5,
-						0.5
-					],
-					"pivot":
-					[
-						0.5,
-						0.5
-					],
-					"size":
-					[
-						18,
-						18
-					],
-					"color":
-					[
-						120,
-						80,
-						170,
-						255
-					]
-				}
-			},
-			"Pressed":
-			{
-				"Image":
-				{
-					"anchor":
-					[
-						0.5,
-						0.5
-					],
-					"pivot":
-					[
-						0.5,
-						0.5
-					],
-					"size":
-					[
-						18,
-						18
-					],
-					"color":
-					[
-						150,
-						100,
-						200,
-						255
-					]
-				}
+				"anchor":
+				[
+					0.5,
+					0.5
+				],
+				"pivot":
+				[
+					0.5,
+					0.5
+				],
+				"size":
+				[
+					22,
+					22
+				],
+				"textureName": "checkbox_off"
 			}
 		},
 		"checkedView":
@@ -109,45 +44,35 @@
 				],
 				"size":
 				[
-					10,
-					10
+					22,
+					22
 				],
-				"color":
-				[
-					244,
-					199,
-					110,
-					255
-				]
+				"textureName": "checkbox_on"
 			}
 		},
-		"uncheckedView":
+		"viewColors":
 		{
-			"Image":
-			{
-				"anchor":
-				[
-					0.5,
-					0.5
-				],
-				"pivot":
-				[
-					0.5,
-					0.5
-				],
-				"size":
-				[
-					10,
-					10
-				],
-				"color":
-				[
-					0,
-					0,
-					0,
-					0
-				]
-			}
+			"Normal":
+			[
+				200,
+				200,
+				200,
+				255
+			],
+			"Highlighted":
+			[
+				255,
+				255,
+				255,
+				255
+			],
+			"Pressed":
+			[
+				255,
+				230,
+				150,
+				255
+			]
 		}
 	}
 }

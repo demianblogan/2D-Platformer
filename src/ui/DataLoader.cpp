@@ -334,10 +334,16 @@ namespace UI
 					checkbox->SetCheckedView(loader.LoadElement(data["checkedView"]));
 				if (data.contains("uncheckedView"))
 					checkbox->SetUncheckedView(loader.LoadElement(data["uncheckedView"]));
-
+				if (data.contains("viewColors"))
+				{
+					for (const auto& [stateName, colorData] : data["viewColors"].items())
+					{
+						const InteractionState state = ParseInteractionState(stateName);
+						checkbox->SetViewColor(state, ParseColor(colorData));
+					}
+				}
 				if (data.contains("checked"))
 					checkbox->SetChecked(data["checked"]);
-
 				if (data.contains("action"))
 				{
 					const std::string actionName = data["action"];
@@ -394,10 +400,14 @@ namespace UI
 				auto stepper = std::make_unique<Stepper>();
 				ApplyCommonFields(*stepper, data);
 
-				if (data.contains("leftArrow"))
-					stepper->SetLeftArrow(loader.LoadElement(data["leftArrow"]));
-				if (data.contains("rightArrow"))
-					stepper->SetRightArrow(loader.LoadElement(data["rightArrow"]));
+				if (data.contains("leftArrowNormal"))
+					stepper->SetLeftArrowNormal(loader.LoadElement(data["leftArrowNormal"]));
+				if (data.contains("leftArrowPressed"))
+					stepper->SetLeftArrowPressed(loader.LoadElement(data["leftArrowPressed"]));
+				if (data.contains("rightArrowNormal"))
+					stepper->SetRightArrowNormal(loader.LoadElement(data["rightArrowNormal"]));
+				if (data.contains("rightArrowPressed"))
+					stepper->SetRightArrowPressed(loader.LoadElement(data["rightArrowPressed"]));
 				if (data.contains("valueLabel"))
 					stepper->SetValueLabel(loader.LoadElement(data["valueLabel"]));
 

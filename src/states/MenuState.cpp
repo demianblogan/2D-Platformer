@@ -358,33 +358,26 @@ void MenuState::Update(float deltaTime)
 	if (transition.GetMode() == Transition::Mode::Idle)
 	{
 		Input& input = context.input;
-		const bool activated = userInterface.IsElementActivated();
 
 		if (input.WasPressed(Action::MenuBack))
 		{
-			if (activated)
-				userInterface.CancelActivation();
-			else
-				pendingRequest = NavRequest::Back;
+			pendingRequest = NavRequest::Back;
 		}
-		else if (!activated)
+		else if (input.WasPressed(Action::MenuDown))
 		{
-			if (input.WasPressed(Action::MenuDown))
-				userInterface.NavigateDown();
-			else if (input.WasPressed(Action::MenuUp))
-				userInterface.NavigateUp();
-			else if (input.WasPressed(Action::MenuLeft))
-				userInterface.NavigateLeft();
-			else if (input.WasPressed(Action::MenuRight))
-				userInterface.NavigateRight();
+			userInterface.NavigateDown();
 		}
-
-		if (activated)
+		else if (input.WasPressed(Action::MenuUp))
 		{
-			if (input.WasPressed(Action::MenuLeft))
-				userInterface.NavigateValue(-1);
-			else if (input.WasPressed(Action::MenuRight))
-				userInterface.NavigateValue(1);
+			userInterface.NavigateUp();
+		}
+		else if (input.WasPressed(Action::MenuLeft))
+		{
+			userInterface.NavigateLeft();
+		}
+		else if (input.WasPressed(Action::MenuRight))
+		{
+			userInterface.NavigateRight();
 		}
 
 		if (input.WasPressed(Action::MenuConfirm))

@@ -27,7 +27,7 @@ namespace UI
 		void SetFilter(std::function<bool(char32_t)> filter);
 		void SetOnTextChanged(std::function<void(const std::string&)> callback);
 
-		bool RequiresActivation() const override { return true; }
+		bool IsValueControl() const override { return true; }
 
 		void Update(float deltaTime) override;
 		void HandleEvent(const sf::Event& event) override;

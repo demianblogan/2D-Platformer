@@ -21,6 +21,10 @@
 	"slider_fill": "assets/textures/ui/slider_fill.png",
 	"slider_handle": "assets/textures/ui/slider_handle.png",
 	"container_background2": "assets/textures/ui/container_background2.png",
-	"arrow_left": "assets/textures/ui/arrow_left.png",
-	"arrow_right": "assets/textures/ui/arrow_right.png"
+	"arrow_left_normal": "assets/textures/ui/arrow_left_normal.png",
+	"arrow_left_pressed": "assets/textures/ui/arrow_left_pressed.png",
+	"arrow_right_normal": "assets/textures/ui/arrow_right_normal.png",
+	"arrow_right_pressed": "assets/textures/ui/arrow_right_pressed.png",
+	"checkbox_off": "assets/textures/ui/checkbox_off.png",
+	"checkbox_on": "assets/textures/ui/checkbox_on.png"
 }
