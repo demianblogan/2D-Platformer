@@ -30,6 +30,7 @@ Application::Application()
 	audioMixer.SetMusicVolume(settings.GetMusicVolume() / 10.0f);
 
 	input.LoadConfig("data/input.json");
+	input.LoadDefaults("data/input_default.json");
 
 	resources.textures.Load("cursor", "assets/textures/cursor/pointer.png");
 	resources.textures.Get("cursor").setSmooth(false);
@@ -147,12 +148,6 @@ void Application::ProcessEvents()
 
 		if (event->is<sf::Event::Closed>())
 			window.close();
-
-		if (const auto* key = event->getIf<sf::Event::KeyPressed>())
-		{
-			if (key->code == sf::Keyboard::Key::Escape)
-				window.close();
-		}
 
 		stateMachine.HandleEvent(*event);
 	}

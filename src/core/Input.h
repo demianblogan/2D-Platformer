@@ -11,6 +11,7 @@ enum class Action
 	MoveLeft,
 	MoveRight,
 	Jump,
+	Pause,
 	MenuUp,
 	MenuDown,
 	MenuLeft,
@@ -31,6 +32,7 @@ class Input
 {
 public:
 	void LoadConfig(const std::string& path);
+	void LoadDefaults(const std::string& path);
 
 	// Called once per fixed update step, before states update.
 	void Update();
@@ -44,6 +46,19 @@ public:
 	InputDevice GetActiveDevice() const { return activeDevice; }
 
 	void NotifyMouseUsed() { activeDevice = InputDevice::Mouse; }
+
+	// Working/saved model for the keyboard rebinding page (mirrors Settings).
+	bool IsDirty() const;
+	void Revert();
+	void SaveConfig(const std::string& path);
+	void ResetToDefaults();
+
+	// Keyboard rebinding works on a single primary key per action; gamepad
+	// button/axis bindings are left untouched.
+	sf::Keyboard::Key GetPrimaryKey(Action action) const;
+	void SetPrimaryKey(Action action, sf::Keyboard::Key key);
+
+	static std::string KeyName(sf::Keyboard::Key key);
 
 private:
 	enum class BindingType
@@ -60,14 +75,23 @@ private:
 		unsigned int button = 0;
 		sf::Joystick::Axis axis = sf::Joystick::Axis::X;
 		float direction = 0.0f; // sign for an axis binding
+
+		bool operator==(const Binding& other) const = default;
 	};
+
+	static constexpr int ACTION_COUNT = static_cast<int>(Action::Count);
+
+	using BindingSet = std::vector<Binding>[ACTION_COUNT];
+
+	static void LoadBindingsFile(const std::string& path, BindingSet target, float* outAxisThreshold);
 
 	static int FindGamepad();
 	bool IsBindingDown(const Binding& binding, int gamepad, bool& fromGamepad) const;
 
-	static constexpr int ACTION_COUNT = static_cast<int>(Action::Count);
+	std::vector<Binding> bindings[ACTION_COUNT];        // working set used by Update
+	std::vector<Binding> savedBindings[ACTION_COUNT];   // last persisted state
+	std::vector<Binding> defaultBindings[ACTION_COUNT]; // factory defaults
 
-	std::vector<Binding> bindings[ACTION_COUNT];
 	bool currentDown[ACTION_COUNT] = {};
 	bool previousDown[ACTION_COUNT] = {};
 

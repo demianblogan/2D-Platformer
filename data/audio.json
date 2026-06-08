@@ -14,12 +14,12 @@
 		"player_wall_slide":
 		{
 			"path": "assets/audio/sounds/player/wall_slide.ogg",
-			"volume": 0.5
+			"volume": 1.0
 		},
 		"player_hurt":
 		{
 			"path": "assets/audio/sounds/player/hurt.ogg",
-			"volume": 0.8
+			"volume": 0.9
 		},
 		"player_death":
 		{
@@ -29,7 +29,7 @@
 		"fruit_collect":
 		{
 			"path": "assets/audio/sounds/fruits/collect.ogg",
-			"volume": 0.7
+			"volume": 0.4
 		},
 		"box_wood_hit":
 		{
@@ -39,7 +39,7 @@
 		"box_metal_hit":
 		{
 			"path": "assets/audio/sounds/boxes/metal_hit.ogg",
-			"volume": 0.8
+			"volume": 1.0
 		},
 		"box_destroy":
 		{

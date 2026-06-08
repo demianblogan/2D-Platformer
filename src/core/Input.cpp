@@ -13,6 +13,7 @@ namespace
 		{ "MoveLeft", Action::MoveLeft },
 		{ "MoveRight", Action::MoveRight },
 		{ "Jump", Action::Jump },
+		{ "Pause", Action::Pause },
 		{ "MenuUp", Action::MenuUp },
 		{ "MenuDown", Action::MenuDown },
 		{ "MenuLeft", Action::MenuLeft },
@@ -53,9 +54,36 @@ namespace
 		{ "U", sf::Joystick::Axis::U }, { "V", sf::Joystick::Axis::V },
 		{ "PovX", sf::Joystick::Axis::PovX }, { "PovY", sf::Joystick::Axis::PovY }
 	};
+
+	std::string ActionToString(Action action)
+	{
+		for (const auto& [name, value] : ACTION_NAMES)
+			if (value == action)
+				return name;
+
+		return "";
+	}
+
+	std::string AxisToString(sf::Joystick::Axis axis)
+	{
+		for (const auto& [name, value] : AXIS_NAMES)
+			if (value == axis)
+				return name;
+
+		return "X";
+	}
 }
 
-void Input::LoadConfig(const std::string& path)
+std::string Input::KeyName(sf::Keyboard::Key key)
+{
+	for (const auto& [name, value] : KEY_NAMES)
+		if (value == key)
+			return name;
+
+	return "None";
+}
+
+void Input::LoadBindingsFile(const std::string& path, BindingSet target, float* outAxisThreshold)
 {
 	std::ifstream file(path);
 	if (!file.is_open())
@@ -63,10 +91,11 @@ void Input::LoadConfig(const std::string& path)
 
 	const nlohmann::json data = nlohmann::json::parse(file);
 
-	axisThreshold = data.value("axisThreshold", 50.0f);
+	if (outAxisThreshold != nullptr)
+		*outAxisThreshold = data.value("axisThreshold", 50.0f);
 
-	for (std::vector<Binding>& list : bindings)
-		list.clear();
+	for (int i = 0; i < ACTION_COUNT; i++)
+		target[i].clear();
 
 	for (const auto& [actionName, bindingList] : data.at("bindings").items())
 	{
@@ -74,7 +103,7 @@ void Input::LoadConfig(const std::string& path)
 		if (actionFound == ACTION_NAMES.end())
 			throw std::runtime_error("Input: unknown action '" + actionName + "'");
 
-		std::vector<Binding>& target = bindings[static_cast<int>(actionFound->second)];
+		std::vector<Binding>& list = target[static_cast<int>(actionFound->second)];
 
 		for (const auto& bindingData : bindingList)
 		{
@@ -111,9 +140,118 @@ void Input::LoadConfig(const std::string& path)
 				throw std::runtime_error("Input: binding needs 'key', 'button' or 'axis'");
 			}
 
-			target.push_back(binding);
+			list.push_back(binding);
 		}
 	}
+}
+
+void Input::LoadConfig(const std::string& path)
+{
+	LoadBindingsFile(path, bindings, &axisThreshold);
+
+	for (int i = 0; i < ACTION_COUNT; i++)
+		savedBindings[i] = bindings[i];
+}
+
+void Input::LoadDefaults(const std::string& path)
+{
+	LoadBindingsFile(path, defaultBindings, nullptr);
+}
+
+bool Input::IsDirty() const
+{
+	for (int i = 0; i < ACTION_COUNT; i++)
+		if (bindings[i] != savedBindings[i])
+			return true;
+
+	return false;
+}
+
+void Input::Revert()
+{
+	for (int i = 0; i < ACTION_COUNT; i++)
+		bindings[i] = savedBindings[i];
+}
+
+void Input::ResetToDefaults()
+{
+	for (int i = 0; i < ACTION_COUNT; i++)
+		bindings[i] = defaultBindings[i];
+}
+
+void Input::SaveConfig(const std::string& path)
+{
+	nlohmann::json data;
+	data["axisThreshold"] = axisThreshold;
+
+	nlohmann::json bindingsJson = nlohmann::json::object();
+
+	for (int i = 0; i < ACTION_COUNT; i++)
+	{
+		nlohmann::json list = nlohmann::json::array();
+
+		for (const Binding& binding : bindings[i])
+		{
+			nlohmann::json entry = nlohmann::json::object();
+
+			switch (binding.type)
+			{
+			case BindingType::Key:
+				entry["key"] = KeyName(binding.key);
+				break;
+			case BindingType::Button:
+				entry["button"] = binding.button;
+				break;
+			case BindingType::Axis:
+				entry["axis"] = AxisToString(binding.axis);
+				entry["direction"] = binding.direction;
+				break;
+			}
+
+			list.push_back(entry);
+		}
+
+		bindingsJson[ActionToString(static_cast<Action>(i))] = list;
+	}
+
+	data["bindings"] = bindingsJson;
+
+	std::ofstream file(path);
+	if (!file.is_open())
+		throw std::runtime_error("Input: cannot write '" + path + "'");
+
+	file << data.dump(1, '\t');
+
+	for (int i = 0; i < ACTION_COUNT; i++)
+		savedBindings[i] = bindings[i];
+}
+
+sf::Keyboard::Key Input::GetPrimaryKey(Action action) const
+{
+	for (const Binding& binding : bindings[static_cast<int>(action)])
+		if (binding.type == BindingType::Key)
+			return binding.key;
+
+	return sf::Keyboard::Key::Unknown;
+}
+
+void Input::SetPrimaryKey(Action action, sf::Keyboard::Key key)
+{
+	std::vector<Binding>& list = bindings[static_cast<int>(action)];
+
+	for (Binding& binding : list)
+	{
+		if (binding.type == BindingType::Key)
+		{
+			binding.key = key;
+			return;
+		}
+	}
+
+	Binding binding;
+	binding.type = BindingType::Key;
+	binding.key = key;
+	list.insert(list.begin(), binding);
 }
 
 int Input::FindGamepad()
