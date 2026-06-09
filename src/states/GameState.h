@@ -7,6 +7,7 @@
 #include "graphics/ParticleSystem.h"
 #include "graphics/ConfettiSystem.h"
 #include "graphics/Transition.h"
+#include "graphics/AnimatedBackground.h"
 #include "systems/AnimationSystem.h"
 #include "systems/DamageSystem.h"
 #include "systems/DeathSystem.h"
@@ -64,6 +65,7 @@ private:
 
 	Camera camera;
 	Tilemap tilemap;
+	AnimatedBackground background;
 
 	ParticleSystem particles;
 	ConfettiSystem confetti;
@@ -102,6 +104,10 @@ private:
 
 	bool wasOnGround = false;
 	bool deathSoundPlayed = false;
+	float deathFlashTimer = 0.0f; // white "lightning" flash over the background on death
+
+	static constexpr float DEATH_FLASH_TIME = 0.2f; // duration of the death "lightning" flash
+
 	int previousPlayerHealth = -1;
 	int previousJumpsRemaining = 0;
 	float runDustTimer = 0.0f;
