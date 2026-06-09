@@ -32,7 +32,9 @@
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 
+#include <cstdint>
 #include <cmath>
 #include <memory>
 #include <iostream> //DEBUG
@@ -64,7 +66,9 @@ namespace
 GameState::GameState(Context& context, const std::string& levelPath, int levelNumber,
 	std::optional<sf::Vector2f> respawnAt)
 	: State(context)
+	, background(context.resources)
 	, particles(context.resources)
+	, confetti(context.resources)
 	, inputSystem(registry, context.input)
 	, jumpSystem(registry)
 	, damageSystem(registry)
@@ -82,7 +86,6 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, levelPath(levelPath)
 	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
-	, confetti(context.resources)
 {
 	Resources& resources = context.resources;
 
@@ -94,6 +97,10 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 
 	resources.LoadTexturesFromFile("data/levels/game_textures.json");
 	particles.LoadConfig("data/particles.json");
+
+	background.SetTexture("blue");
+	background.SetDirection(AnimatedBackground::Direction::Right);
+	background.SetSpeed(16.0f);
 
 	tilemap = LoadTilemap(levelPath, "terrain", 22);
 	particles.SetTilemap(tilemap);
@@ -478,6 +485,11 @@ void GameState::Update(float deltaTime)
 {
 	transition.Update(deltaTime);
 
+	// Decay the death flash here so it still fades while the restart wipe runs (the
+	// blocks below return early once a death/finish is in progress).
+	if (deathFlashTimer > 0.0f)
+		deathFlashTimer -= deltaTime;
+
 	if (isCompleting)
 	{
 		if (transition.GetMode() == Transition::Mode::Done)
@@ -519,6 +531,7 @@ void GameState::Update(float deltaTime)
 
 	particles.Update(deltaTime);
 	confetti.Update(deltaTime);
+	background.Update(deltaTime);
 
 	UpdateScoreLabel();
 	hudInterface.Update(deltaTime);
@@ -587,6 +600,7 @@ void GameState::Update(float deltaTime)
 			{
 				context.audioMixer.PlaySound("player_death");
 				deathSoundPlayed = true;
+				deathFlashTimer = DEATH_FLASH_TIME;
 			}
 
 			if (fellIntoPit)
@@ -601,12 +615,27 @@ void GameState::Render(float interpolationFactor)
 {
 	sf::RenderTarget& renderTarget = context.virtualScreen.GetRenderTarget();
 
-	renderTarget.clear(sf::Color(60, 140, 200));
+	renderTarget.clear(sf::Color::Black);
 
+	// Background in screen space.
+	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	background.Draw(renderTarget);
+
+	// Death "lightning": briefly wash the background white, fading back to normal.
+	if (deathFlashTimer > 0.0f)
+	{
+		const float intensity = deathFlashTimer / DEATH_FLASH_TIME;
+		sf::RectangleShape flash({ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
+		flash.setFillColor(sf::Color(255, 255, 255, static_cast<std::uint8_t>(intensity * 255.0f)));
+		renderTarget.draw(flash);
+	}
+
+	// World in camera space.
 	const sf::Vector2f worldCenter = camera.GetRenderCenter(interpolationFactor);
 	context.virtualScreen.SetCameraCenter(worldCenter.x, worldCenter.y);
 
 	DrawTilemap(tilemap, renderTarget, context.resources);
+
 	particles.Draw(renderTarget);
 	renderSystem.Render(interpolationFactor);
 	confetti.Draw(renderTarget);

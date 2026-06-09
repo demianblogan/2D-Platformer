@@ -46,5 +46,7 @@
 	"checkpoint_flag_out": "assets/textures/items/checkpoints/Checkpoint/Checkpoint (Flag Out) (64x64).png",
 	"checkpoint_flag_idle": "assets/textures/items/checkpoints/Checkpoint/Checkpoint (Flag Idle)(64x64).png",
 
-	"confetti": "assets/textures/other/confetti_(16x16).png"
+	"confetti": "assets/textures/other/confetti_(16x16).png",
+
+	"blue": "assets/textures/background/blue.png"
 }
