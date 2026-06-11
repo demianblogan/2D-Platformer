@@ -2,11 +2,13 @@
 
 #include "Context.h"
 #include "audio/Mixer.h"
+#include "core/Campaign.h"
 #include "core/Input.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
 #include "states/GameState.h"
+#include "ui/Button.h"
 #include "ui/Element.h"
 
 #include <memory>
@@ -53,6 +55,7 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
+	interfaceLoader.RegisterAction("menu_continue_game", [this] { pendingRequest = NavRequest::ContinueGame; });
 }
 
 void MenuState::ShowPanel(const std::string& panelId)
@@ -66,7 +69,41 @@ void MenuState::ShowPanel(const std::string& panelId)
 	slot->AddChild(interfaceLoader.LoadFromFile(MENU_DIRECTORY + panelId + ".json"));
 
 	userInterface.SetContent(std::move(frame));
+
+	if (panelId == "single")
+		SetupSinglePanel();
+	else if (panelId == "play")
+		SetupPlayPanel();
+
 	userInterface.ResetFocus();
+}
+
+void MenuState::DisableButton(const std::string& buttonName)
+{
+	const sf::Color disabledTint(110, 110, 110, 255);
+
+	if (auto* button = dynamic_cast<UI::Button*>(userInterface.FindByName(buttonName)))
+	{
+		button->SetEnabled(false);
+		button->SetBackgroundTint(disabledTint);
+		button->SetForegroundColor(UI::InteractionState::Normal, disabledTint);
+	}
+}
+
+void MenuState::SetupSinglePanel()
+{
+	// Continue unlocks once the first level is completed.
+	if (context.campaign.GetHighestCompletedLevel() < 1)
+		DisableButton("continue_button");
+
+	// Level Select is not implemented yet.
+	DisableButton("select_level_button");
+}
+
+void MenuState::SetupPlayPanel()
+{
+	// Two Players waits for the multiplayer implementation.
+	DisableButton("two_players_button");
 }
 
 void MenuState::GoBackPanel()
@@ -92,8 +129,23 @@ void MenuState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::StartGame:
-		context.stateMachine.Push(std::make_unique<GameState>(context, "data/levels/level_2.tmj", 1));
+		context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(1), 1));
 		break;
+
+	case NavRequest::ContinueGame:
+	{
+		// The next level after the furthest completed one; when everything
+		// available is already done, replay the furthest level.
+		const int highest = context.campaign.GetHighestCompletedLevel();
+		int nextLevel = highest + 1;
+
+		if (!Campaign::LevelExists(nextLevel))
+			nextLevel = highest;
+
+		if (Campaign::LevelExists(nextLevel))
+			context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(nextLevel), nextLevel));
+		break;
+	}
 
 	case NavRequest::Exit:
 		context.stateMachine.Clear();

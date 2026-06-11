@@ -6,6 +6,7 @@ class Resources;
 class Input;
 class Settings;
 class GraphicsTarget;
+class Campaign;
 
 namespace Audio
 {
@@ -21,4 +22,5 @@ struct Context
 	Input& input;
 	Settings& settings;
 	GraphicsTarget& graphics;
+	Campaign& campaign;
 };

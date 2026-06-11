@@ -20,9 +20,10 @@
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
 	, audioMixer(resources)
-	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings, *this)
+	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings, *this, campaign)
 {
 	settings.Load("data/settings.json");
+	campaign.Load("data/save.json");
 
 	CreateWindow();
 

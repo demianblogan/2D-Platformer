@@ -34,11 +34,13 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "continue_button",
 					"offset":
 					[
 						0,
 						-18
 					],
+					"action": "menu_continue_game",
 					"foregrounds":
 					{
 						"Normal":
@@ -55,6 +57,7 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "select_level_button",
 					"offset":
 					[
 						0,

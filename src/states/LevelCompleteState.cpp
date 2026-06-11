@@ -1,6 +1,7 @@
 #include "LevelCompleteState.h"
 
 #include "Context.h"
+#include "core/Campaign.h"
 #include "core/Input.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
@@ -81,6 +82,15 @@ LevelCompleteState::LevelCompleteState(Context& context, std::string levelPath, 
 	RegisterActions();
 	completeInterface.SetContent(completeLoader.LoadFromFile(LEVEL_COMPLETE_UI_PATH));
 	completeInterface.ResetFocus();
+
+	// Persist campaign progress as soon as the menu appears, using the same star
+	// rules the reveal animation applies later.
+	const int earnedStars =
+		(this->deathCount == 0 ? 1 : 0)
+		+ ((this->maxFruits > 0 && this->fruitsCollected >= this->maxFruits) ? 1 : 0)
+		+ ((this->maxEnemies > 0 && this->enemiesKilled >= this->maxEnemies) ? 1 : 0);
+
+	context.campaign.RecordCompletion(this->levelNumber, earnedStars);
 }
 
 void LevelCompleteState::RegisterActions()
@@ -242,6 +252,19 @@ void LevelCompleteState::ApplyPendingNavigation()
 	switch (pendingRequest)
 	{
 	case NavRequest::Continue:
+	{
+		// Continue goes to the next campaign level; past the last one — to the menu.
+		const int nextLevel = levelNumber + 1;
+
+		context.stateMachine.Clear();
+
+		if (Campaign::LevelExists(nextLevel))
+			context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(nextLevel), nextLevel));
+		else
+			context.stateMachine.Push(std::make_unique<MenuState>(context));
+		break;
+	}
+
 	case NavRequest::QuitToMenu:
 		context.stateMachine.Clear();
 		context.stateMachine.Push(std::make_unique<MenuState>(context));
