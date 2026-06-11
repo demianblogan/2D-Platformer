@@ -24,6 +24,7 @@
 #include "systems/PlayerAnimationSystem.h"
 #include "systems/RenderSystem.h"
 #include "systems/BoxSystem.h"
+#include "systems/TrampolineSystem.h"
 #include "systems/TrunkSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
@@ -65,6 +66,7 @@ private:
 
 	bool IsPlayerOnStartPlatform();
 	bool IsPlayerOnFinish();
+	bool IsPlayerOnDeathTile();
 
 	sf::Vector2f PlayerCenter();
 
@@ -116,6 +118,7 @@ private:
 	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;
 	ECS::BoxSystem boxSystem;
+	ECS::TrampolineSystem trampolineSystem;
 	ECS::MovementSystem movementSystem;
 	ECS::BulletSystem bulletSystem;
 	ECS::PickupSystem pickupSystem;

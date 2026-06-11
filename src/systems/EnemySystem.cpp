@@ -5,6 +5,7 @@
 #include "components/Enemy.h"
 #include "components/EnemyDeath.h"
 #include "components/Health.h"
+#include "components/Jump.h"
 #include "components/Player.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
@@ -76,6 +77,14 @@ namespace ECS
 					playerVelocity.y = -200.0f;
 					score += enemy.scoreValue;
 					enemiesKilled++;
+
+					// The stomp bounce acts as a first jump: guarantee one air jump,
+					// which then plays the double-jump sound and animation.
+					if (registry.Has<Jump>(playerEntity)
+						&& registry.Get<Jump>(playerEntity).jumpsRemaining < 1)
+					{
+						registry.Get<Jump>(playerEntity).jumpsRemaining = 1;
+					}
 				}
 				else
 				{

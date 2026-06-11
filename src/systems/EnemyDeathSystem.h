@@ -8,7 +8,7 @@ namespace ECS
 	{
 	public:
 		EnemyDeathSystem(Registry& registry);
-		void Update(float deltaTime);
+		void Update(float deltaTime, float fallLimit);
 
 	private:
 		Registry& registry;

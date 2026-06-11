@@ -16,7 +16,7 @@ namespace ECS
 		: registry(registry)
 	{}
 
-	void EnemyDeathSystem::Update(float deltaTime)
+	void EnemyDeathSystem::Update(float deltaTime, float fallLimit)
 	{
 		std::vector<Entity> toDestroy;
 
@@ -53,7 +53,7 @@ namespace ECS
 						rot.angle += rot.spinSpeed * deltaTime;
 					}
 
-					if (transform.y > 370.0f)
+					if (transform.y > fallLimit)
 						toDestroy.push_back(entity);
 					break;
 				}

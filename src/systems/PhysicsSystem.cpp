@@ -6,8 +6,10 @@
 #include "components/CollisionState.h"
 #include "components/Facing.h"
 #include "components/Gravity.h"
+#include "components/Jump.h"
 #include "components/PreviousTransform.h"
 #include "components/Solid.h"
+#include "components/Trampoline.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "components/WallSlide.h"
@@ -104,7 +106,7 @@ namespace ECS
 				{
 					ResolveVertical(transform, collider, velocity, collisionState);
 					if (collidesWithBoxes)
-						ResolveVerticalBoxes(transform, collider, velocity, collisionState, boxes);
+						ResolveVerticalBoxes(entity, transform, collider, velocity, collisionState, boxes);
 				}
 
 				// Dropped items (no player control) stop sliding once they land.
@@ -266,7 +268,7 @@ namespace ECS
 		}
 	}
 
-	void PhysicsSystem::ResolveVerticalBoxes(Transform& transform, const Collider& collider, Velocity& velocity, CollisionState& collisionState, const std::vector<SolidBox>& boxes)
+	void PhysicsSystem::ResolveVerticalBoxes(Entity entity, Transform& transform, const Collider& collider, Velocity& velocity, CollisionState& collisionState, const std::vector<SolidBox>& boxes)
 	{
 		if (velocity.y == 0.0f)
 			return;
@@ -291,6 +293,14 @@ namespace ECS
 				if (box.bounceSpeed > 0.0f)
 				{
 					velocity.y = -box.bounceSpeed; // trampoline
+
+					// The bounce acts as a first jump: guarantee one air jump after it,
+					// which then plays the double-jump sound and animation.
+					if (registry.Has<Jump>(entity) && registry.Get<Jump>(entity).jumpsRemaining < 1)
+						registry.Get<Jump>(entity).jumpsRemaining = 1;
+
+					if (registry.Has<Trampoline>(box.entity))
+						registry.Get<Trampoline>(box.entity).wasBounced = true;
 				}
 				else
 				{

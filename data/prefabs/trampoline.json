@@ -1,0 +1,34 @@
+{
+	"Sprite":
+	{
+		"textureName": "trampoline_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "trampoline_idle",
+			"frameCount": 1,
+			"frameDuration": 1.0,
+			"isLooping": true
+		},
+		"Jump":
+		{
+			"textureName": "trampoline_jump",
+			"frameCount": 8,
+			"frameDuration": 0.05,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Solid":
+	{
+		"width": 24,
+		"height": 11,
+		"bounceSpeed": 700
+	},
+	"Trampoline": {}
+}

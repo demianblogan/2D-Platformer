@@ -55,6 +55,9 @@
 	"mushroom_run":  "assets/textures/enemies/mushroom/Run (32x32).png",
 	"mushroom_hit":  "assets/textures/enemies/mushroom/Hit.png",
 
+	"trampoline_idle": "assets/textures/traps/trampoline/Idle.png",
+	"trampoline_jump": "assets/textures/traps/trampoline/Jump (28x28).png",
+
 	"trunk_idle":          "assets/textures/enemies/trunk/Idle (64x32).png",
 	"trunk_run":           "assets/textures/enemies/trunk/Run (64x32).png",
 	"trunk_attack":        "assets/textures/enemies/trunk/Attack (64x32).png",

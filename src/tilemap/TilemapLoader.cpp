@@ -112,6 +112,19 @@ Tilemap LoadTilemap(const std::string& path, const std::string& textureName, int
 				continue;
 			}
 
+			// The "death" layer is logic-only: touching its tiles counts as a pit death.
+			if (layer.name == "death")
+			{
+				tilemap.deathWidth = layer.width;
+				tilemap.deathHeight = layer.height;
+				tilemap.deathGrid.assign(static_cast<std::size_t>(layer.width) * layer.height, false);
+
+				for (std::size_t i = 0; i < layer.data.size(); i++)
+					tilemap.deathGrid[i] = (layer.data[i] != 0);
+
+				continue;
+			}
+
 			BuildLayerVertices(layer, tilemap.tileSize, tilemap.atlasWidthInTiles, tilemap.firstGid);
 
 			tilemap.layers.push_back(std::move(layer));
