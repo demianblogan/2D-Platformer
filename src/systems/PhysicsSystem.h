@@ -37,7 +37,7 @@ namespace ECS
 		bool IsWallAt(const Transform& transform, const Collider& collider, int direction) const;
 
 		void ResolveHorizontalBoxes(Transform& transform, const Collider& collider, Velocity& velocity, const std::vector<SolidBox>& boxes) const;
-		void ResolveVerticalBoxes(Transform& transform, const Collider& collider, Velocity& velocity, CollisionState& collisionState, const std::vector<SolidBox>& boxes);
+		void ResolveVerticalBoxes(Entity entity, Transform& transform, const Collider& collider, Velocity& velocity, CollisionState& collisionState, const std::vector<SolidBox>& boxes);
 		bool IsBoxWallAt(const Transform& transform, const Collider& collider, int direction, const std::vector<SolidBox>& boxes) const;
 
 		Registry& registry;

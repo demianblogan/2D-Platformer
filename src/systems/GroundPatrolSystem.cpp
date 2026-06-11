@@ -9,14 +9,16 @@
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "graphics/ParticleSystem.h"
 
 #include <cmath>
 
 namespace ECS
 {
-	GroundPatrolSystem::GroundPatrolSystem(Registry& registry, const Tilemap& tilemap)
+	GroundPatrolSystem::GroundPatrolSystem(Registry& registry, const Tilemap& tilemap, ParticleSystem& particles)
 		: registry(registry)
 		, tilemap(tilemap)
+		, particles(particles)
 	{}
 
 	void GroundPatrolSystem::Update(float deltaTime)
@@ -59,6 +61,19 @@ namespace ECS
 						patrol.stateTimer = GroundPatrol::TURN_IDLE_DURATION;
 						velocity.x        = 0.0f;
 						animState.current = "Idle";
+					}
+					else if (patrol.speed > 0.0f)
+					{
+						// Same run dust as the player's, spaced by distance traveled so
+						// slow walkers don't pile the puffs up.
+						patrol.dustTimer -= deltaTime;
+						if (patrol.dustTimer <= 0.0f)
+						{
+							const float backX = transform.x
+								- static_cast<float>(patrol.direction) * particles.GetRunBackOffset();
+							particles.Emit("run", { backX, transform.y });
+							patrol.dustTimer = GroundPatrol::DUST_SPACING / patrol.speed;
+						}
 					}
 					break;
 				}

@@ -27,6 +27,7 @@
 #include "components/Checkpoint.h"
 #include "components/GroundPatrol.h"
 #include "components/TrunkAI.h"
+#include "components/Trampoline.h"
 #include "core/ecs/Registry.h"
 
 #include <functional>
@@ -233,6 +234,11 @@ void DataLoader::RegisterLoaders()
 			registry.Add<ECS::TrunkAI>(entity, {});
 		};
 
+	loaders["Trampoline"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::Trampoline>(entity, {});
+		};
+
 	loaders["GroundPatrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
 			ECS::GroundPatrol patrol;
@@ -394,16 +400,21 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 	std::vector<ECS::Entity> createdEntities;
 
 	// Recursive lambda: handles both flat objectgroups and Tiled group layers.
-	std::function<void(const nlohmann::json&)> processLayers = [&](const nlohmann::json& layers)
+	// Group and layer offsets accumulate so objects land where Tiled shows them.
+	std::function<void(const nlohmann::json&, float, float)> processLayers =
+		[&](const nlohmann::json& layers, float parentOffsetX, float parentOffsetY)
 	{
 		for (const auto& layer : layers)
 		{
 			const std::string type = layer.value("type", std::string());
 
+			const float offsetX = parentOffsetX + layer.value("offsetx", 0.0f);
+			const float offsetY = parentOffsetY + layer.value("offsety", 0.0f);
+
 			if (type == "group")
 			{
 				if (layer.contains("layers"))
-					processLayers(layer.at("layers"));
+					processLayers(layer.at("layers"), offsetX, offsetY);
 				continue;
 			}
 
@@ -418,8 +429,8 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 				if (className.empty() || !object.value("point", false))
 					continue;
 
-				const float x = object.at("x");
-				const float y = object.at("y");
+				const float x = offsetX + object.at("x").get<float>();
+				const float y = offsetY + object.at("y").get<float>();
 
 				nlohmann::json entry;
 				entry["prefab"] = "data/prefabs/" + className + ".json";
@@ -445,7 +456,7 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 		}
 	};
 
-	processLayers(mapJson.at("layers"));
+	processLayers(mapJson.at("layers"), 0.0f, 0.0f);
 
 	AddImpliedComponents(registry, createdEntities);
 

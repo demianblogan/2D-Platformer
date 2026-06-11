@@ -86,10 +86,11 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, patrolSystem(registry)
 	, enemySystem(registry, score, context.audioMixer, enemiesKilled)
 	, trunkSystem(registry)
-	, groundPatrolSystem(registry, tilemap)
+	, groundPatrolSystem(registry, tilemap, particles)
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
+	, trampolineSystem(registry, context.audioMixer)
 	, movementSystem(registry)
 	, bulletSystem(registry, tilemap)
 	, pickupSystem(registry, score, fruitsCollected)
@@ -512,6 +513,31 @@ bool GameState::IsPlayerOnFinish()
 	return horizontalOverlap && restingOnTop;
 }
 
+bool GameState::IsPlayerOnDeathTile()
+{
+	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
+	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
+
+	const float tileSize = static_cast<float>(tilemap.tileSize);
+	const float halfWidth = collider.width / 2.0f;
+
+	const int firstColumn = static_cast<int>(std::floor((player.x - halfWidth) / tileSize));
+	const int lastColumn = static_cast<int>(std::floor((player.x + halfWidth - 0.001f) / tileSize));
+	const int firstRow = static_cast<int>(std::floor((player.y - collider.height) / tileSize));
+	const int lastRow = static_cast<int>(std::floor((player.y - 0.001f) / tileSize));
+
+	for (int row = firstRow; row <= lastRow; row++)
+	{
+		for (int column = firstColumn; column <= lastColumn; column++)
+		{
+			if (tilemap.IsDeadly(column, row))
+				return true;
+		}
+	}
+
+	return false;
+}
+
 sf::Vector2f GameState::PlayerCenter()
 {
 	const ECS::Transform& transform = registry.Get<ECS::Transform>(playerEntity);
@@ -641,9 +667,10 @@ void GameState::Update(float deltaTime)
 	enemySystem.Update();
 	trunkSystem.Update(deltaTime);
 	groundPatrolSystem.Update(deltaTime);
-	enemyDeathSystem.Update(deltaTime);
+	enemyDeathSystem.Update(deltaTime, fallLimit);
 	physicsSystem.Update(deltaTime);
 	boxSystem.Update();
+	trampolineSystem.Update();
 	movementSystem.Update(deltaTime);
 	bulletSystem.Update(deltaTime);
 
@@ -718,7 +745,9 @@ void GameState::Update(float deltaTime)
 			previousJumpsRemaining = jump.jumpsRemaining;
 			previousLockTimer = jump.lockTimer;
 
-			const bool fellIntoPit = transform.y > fallLimit;
+			// Death tiles short-circuit the fall: pits on tall maps kill on touch
+			// instead of after a long drop to the world's bottom edge.
+			const bool fellIntoPit = transform.y > fallLimit || IsPlayerOnDeathTile();
 
 			if (health.current < previousPlayerHealth && health.current > 0)
 				context.audioMixer.PlaySound("player_hurt");
