@@ -13,3 +13,6 @@ vcpkg_installed/
 *.pdb
 
 CMakeUserPresets.json
+
+# Per-player campaign progress
+data/save.json

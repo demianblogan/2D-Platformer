@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Context.h"
+#include "core/Campaign.h"
 #include "core/GraphicsTarget.h"
 #include "core/Input.h"
 #include "core/Settings.h"
@@ -44,6 +45,7 @@ private:
 	Audio::Mixer audioMixer;
 	Input input;
 	Settings settings;
+	Campaign campaign;
 	Context context;
 
 	float fpsTimer = 0.0f;

@@ -21,10 +21,11 @@ public:
 	void Render(float interpolationFactor) override;
 
 private:
-	enum class NavRequest { None, OpenPanel, Back, StartGame, Exit };
+	enum class NavRequest { None, OpenPanel, Back, StartGame, ContinueGame, Exit };
 
 	void RegisterActions();
 	void ShowPanel(const std::string& panelId);
+	void SetupSinglePanel();
 	void GoBackPanel();
 	void ApplyPendingNavigation();
 
