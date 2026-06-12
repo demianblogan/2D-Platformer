@@ -2,6 +2,7 @@
 	"Sprite":
 	{
 		"textureName": "cherries",
+		"glow": [ 255, 70, 60 ],
 		"offsetY": 8
 	},
 	"AnimationSet":

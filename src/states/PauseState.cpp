@@ -147,8 +147,12 @@ void PauseState::Render(float /*interpolationFactor*/)
 	if (inSettings)
 	{
 		settings.Render(renderTarget);
+		context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
 		return;
 	}
 
 	pauseInterface.Draw(renderTarget);
+
+	// Bloom the highlighted button.
+	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
 }

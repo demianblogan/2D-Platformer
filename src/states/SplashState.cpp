@@ -92,8 +92,15 @@ void SplashState::Render(float interpolationFactor)
 {
 	backdrop.Render(interpolationFactor);
 
+	// Bloom the backdrop's fruits at world strength.
+	context.virtualScreen.CompositeGlow();
+
 	// UI and transition: screen space, on top.
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 	userInterface.Draw(context.virtualScreen.GetRenderTarget());
+
+	// Bloom the golden title.
+	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+
 	transition.Draw(context.virtualScreen.GetRenderTarget());
 }

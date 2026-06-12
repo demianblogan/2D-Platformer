@@ -63,6 +63,23 @@ void DataLoader::RegisterLoaders()
 			sprite.textureName = data.at("textureName");
 			sprite.offsetX = data.value("offsetX", 0.0f);
 			sprite.offsetY = data.value("offsetY", 0.0f);
+
+			// "glow" is either true (white aura) or an [r, g, b] color.
+			if (data.contains("glow"))
+			{
+				const nlohmann::json& glow = data.at("glow");
+
+				if (glow.is_array())
+				{
+					sprite.glow = true;
+					sprite.glowColor = sf::Color(glow.at(0), glow.at(1), glow.at(2));
+				}
+				else
+				{
+					sprite.glow = glow.get<bool>();
+				}
+			}
+
 			registry.Add<ECS::Sprite>(entity, sprite);
 		};
 

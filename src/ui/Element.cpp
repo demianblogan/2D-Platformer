@@ -17,6 +17,17 @@ namespace UI
 			child->Draw(target, absolutePosition, size);
 	}
 
+	void Element::DrawCached(sf::RenderTarget& target) const
+	{
+		if (!isVisible)
+			return;
+
+		DrawSelf(target, absolutePosition);
+
+		for (const auto& child : children)
+			child->Draw(target, absolutePosition, size);
+	}
+
 	void Element::Update(float deltaTime)
 	{
 		for (const auto& animation : animations)

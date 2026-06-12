@@ -9,6 +9,7 @@
 #include "components/Rotation.h"
 #include "components/Frozen.h"
 #include "core/Resources.h"
+#include "core/VirtualScreen.h"
 #include "core/ecs/Registry.h"
 
 #include <SFML/System/Angle.hpp>
@@ -20,16 +21,18 @@
 
 namespace ECS
 {
-	RenderSystem::RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget)
+	RenderSystem::RenderSystem(Registry& registry, Resources& resources, VirtualScreen& virtualScreen)
 		: registry(registry)
 		, resources(resources)
-		, renderTarget(renderTarget)
+		, virtualScreen(virtualScreen)
 	{}
 
 	void RenderSystem::Render(float interpolationFactor)
 	{
+		sf::RenderTarget& renderTarget = virtualScreen.GetRenderTarget();
+
 		registry.ForEach<Transform, Sprite>(
-			[this, interpolationFactor](Entity entity, Transform& transform, Sprite& sprite)
+			[this, interpolationFactor, &renderTarget](Entity entity, Transform& transform, Sprite& sprite)
 			{
 				if (registry.Has<Frozen>(entity))
 					return;
@@ -93,6 +96,10 @@ namespace ECS
 				drawable.setPosition({ std::floor(renderX + sprite.offsetX), std::floor(renderY + sprite.offsetY) });
 
 				renderTarget.draw(drawable);
+
+				if (sprite.glow)
+					virtualScreen.GetGlowTarget().draw(drawable,
+						virtualScreen.GlowSilhouetteStates(sprite.glowColor));
 			});
 	}
 }

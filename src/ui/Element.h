@@ -23,6 +23,11 @@ namespace UI
 		virtual ~Element() = default;
 
 		void Draw(sf::RenderTarget& target, sf::Vector2f parentPosition, sf::Vector2f parentSize) const;
+
+		// Draws again at the position cached by the last Draw call — e.g. into
+		// the bloom layer. Only valid after Draw has run this frame.
+		void DrawCached(sf::RenderTarget& target) const;
+
 		virtual void Update(float deltaTime);
 		virtual void HandleEvent(const sf::Event& event);
 
@@ -50,6 +55,10 @@ namespace UI
 		sf::Vector2f size = { 0.0f, 0.0f };   // element size in pixels
 
 		bool isVisible = true;
+
+		// When true, the element is redrawn into the bloom layer every frame
+		// and gets a pulsing aura in its own colors (e.g. the golden title).
+		bool glow = false;
 
 		// When true, this element's interactive descendants form one navigation row
 		// (left/right move between them, up/down leave the row).

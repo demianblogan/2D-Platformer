@@ -18,7 +18,20 @@ namespace UI
 	{
 		content = std::move(newContent);
 		CollectInteractives();
+
+		glowingElements.clear();
+		CollectGlowingFrom(*content);
+
 		return *content;
+	}
+
+	void Root::CollectGlowingFrom(Element& element)
+	{
+		if (element.glow)
+			glowingElements.push_back(&element);
+
+		for (Element* child : element.GetChildren())
+			CollectGlowingFrom(*child);
 	}
 
 	Element* Root::FindByName(const std::string& name)
@@ -333,9 +346,25 @@ namespace UI
 
 	void Root::Draw(sf::RenderTarget& target) const
 	{
-		if (content)
-			content->Draw(target, { 0.0f, 0.0f },
-				{ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
+		if (!content)
+			return;
+
+		content->Draw(target, { 0.0f, 0.0f },
+			{ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
+
+		// Always-glowing decorations (e.g. the golden title) bloom in their
+		// own colors, at the positions the pass above just cached.
+		for (const Element* element : glowingElements)
+		{
+			if (element->isVisible)
+				element->DrawCached(virtualScreen.GetGlowTarget());
+		}
+
+		// The highlighted control blooms: draw it once more into the glow
+		// layer, at the position the pass above just cached.
+		InteractiveElement* focused = CurrentElement();
+		if (focused != nullptr && focused->GetState() == InteractionState::Highlighted)
+			focused->DrawCached(virtualScreen.GetGlowTarget());
 	}
 
 	void Root::NavigateUp()

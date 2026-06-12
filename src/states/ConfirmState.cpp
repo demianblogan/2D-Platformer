@@ -81,4 +81,7 @@ void ConfirmState::Render(float interpolationFactor)
 {
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 	dialog.Draw(context.virtualScreen.GetRenderTarget());
+
+	// Bloom the highlighted button.
+	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
 }

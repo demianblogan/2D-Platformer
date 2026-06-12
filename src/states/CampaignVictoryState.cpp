@@ -191,4 +191,7 @@ void CampaignVictoryState::Render(float /*interpolationFactor*/)
 
 	if (phase == Phase::Done)
 		victoryInterface.Draw(rt);
+
+	// Bloom the highlighted button.
+	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
 }

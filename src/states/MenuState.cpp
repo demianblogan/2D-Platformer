@@ -279,6 +279,9 @@ void MenuState::Render(float interpolationFactor)
 {
 	backdrop.Render(interpolationFactor);
 
+	// Bloom the backdrop's fruits now so their halos get frosted with it.
+	context.virtualScreen.CompositeGlow();
+
 	// Frost the level backdrop; the menu UI drawn on top stays sharp.
 	context.virtualScreen.BlurContents();
 
@@ -293,6 +296,9 @@ void MenuState::Render(float interpolationFactor)
 		context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 		userInterface.Draw(renderTarget);
 	}
+
+	// Bloom the highlighted button.
+	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
 
 	transition.Draw(renderTarget);
 }

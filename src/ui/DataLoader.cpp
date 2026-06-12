@@ -35,8 +35,8 @@ namespace UI
 				element.offset = { data["offset"][0], data["offset"][1] };
 			if (data.contains("isVisible"))
 				element.isVisible = data["isVisible"];
-			if (data.contains("isVisible"))
-				element.isVisible = data["isVisible"];
+			if (data.contains("glow"))
+				element.glow = data["glow"];
 			if (data.contains("row"))
 				element.isNavigationRow = data["row"];
 		}

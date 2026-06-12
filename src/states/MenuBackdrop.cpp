@@ -14,7 +14,7 @@ MenuBackdrop::MenuBackdrop(Context& context)
 	, patrolSystem(registry)
 	, movementSystem(registry)
 	, animationSystem(registry)
-	, renderSystem(registry, context.resources, context.virtualScreen.GetRenderTarget())
+	, renderSystem(registry, context.resources, context.virtualScreen)
 	, background(context.resources)
 {
 	Resources& resources = context.resources;

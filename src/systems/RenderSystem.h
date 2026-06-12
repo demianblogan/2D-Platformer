@@ -1,11 +1,7 @@
 #pragma once
 
-namespace sf
-{
-	class RenderTarget;
-}
-
 struct Resources;
+class VirtualScreen;
 
 namespace ECS
 {
@@ -14,13 +10,13 @@ namespace ECS
 	class RenderSystem
 	{
 	public:
-		RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget);
+		RenderSystem(Registry& registry, Resources& resources, VirtualScreen& virtualScreen);
 
 		void Render(float interpolationFactor);
 
 	private:
 		Registry& registry;
 		Resources& resources;
-		sf::RenderTarget& renderTarget;
+		VirtualScreen& virtualScreen;
 	};
 }
