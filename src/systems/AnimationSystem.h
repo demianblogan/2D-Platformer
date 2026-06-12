@@ -1,5 +1,7 @@
 #pragma once
 
+class ParticleSystem;
+
 namespace ECS
 {
 	class Registry;
@@ -7,11 +9,12 @@ namespace ECS
 	class AnimationSystem
 	{
 	public:
-		AnimationSystem(Registry& registry);
+		AnimationSystem(Registry& registry, ParticleSystem* particles = nullptr);
 
 		void Update(float deltaTime);
 
 	private:
 		Registry& registry;
+		ParticleSystem* particles;
 	};
 }

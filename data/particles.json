@@ -39,6 +39,15 @@
 			"speedYMax": -15,
 			"lifetime": 0.3,
 			"scale": 0.5
+		},
+		"wing_flap":
+		{
+			"count": 3,
+			"speedX": 20,
+			"speedYMin": 25,
+			"speedYMax": 55,
+			"lifetime": 0.25,
+			"scale": 0.4
 		}
 	}
 }

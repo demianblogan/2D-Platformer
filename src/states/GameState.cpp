@@ -156,7 +156,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, movementSystem(registry)
 	, bulletSystem(registry, tilemap)
 	, pickupSystem(registry, score, fruitsCollected)
-	, animationSystem(registry)
+	, animationSystem(registry, &particles)
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen)
 	, hudInterface(context.virtualScreen)
