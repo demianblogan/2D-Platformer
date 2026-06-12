@@ -4,20 +4,23 @@
 #include "components/AnimationSet.h"
 #include "components/AnimationState.h"
 #include "components/Sprite.h"
+#include "components/Transform.h"
 #include "core/ecs/Registry.h"
+#include "graphics/ParticleSystem.h"
 
 #include <cassert>
 
 namespace ECS
 {
-	AnimationSystem::AnimationSystem(Registry& registry)
+	AnimationSystem::AnimationSystem(Registry& registry, ParticleSystem* particles)
 		: registry(registry)
+		, particles(particles)
 	{}
 
 	void AnimationSystem::Update(float deltaTime)
 	{
 		registry.ForEach<Animation, AnimationSet, AnimationState, Sprite>(
-			[deltaTime](Entity entity, Animation& animation, AnimationSet& set,
+			[this, deltaTime](Entity entity, Animation& animation, AnimationSet& set,
 				AnimationState& state, Sprite& sprite)
 			{
 				if (state.current != animation.playingState)
@@ -40,6 +43,8 @@ namespace ECS
 					return;
 
 				animation.elapsedTime -= animation.data.frameDuration;
+
+				const int endedFrame = animation.currentFrame;
 				animation.currentFrame++;
 
 				if (animation.currentFrame >= animation.data.frameCount)
@@ -51,6 +56,15 @@ namespace ECS
 						animation.currentFrame = animation.data.frameCount - 1;
 						animation.isFinished = true;
 					}
+				}
+
+				if (particles != nullptr
+					&& endedFrame == animation.data.particleFrame
+					&& !animation.data.particlePreset.empty()
+					&& registry.Has<Transform>(entity))
+				{
+					const Transform& transform = registry.Get<Transform>(entity);
+					particles->Emit(animation.data.particlePreset, { transform.x, transform.y });
 				}
 			});
 	}

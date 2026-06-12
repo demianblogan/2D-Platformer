@@ -95,6 +95,8 @@ void DataLoader::RegisterLoaders()
 				animation.frameDuration = animationData.at("frameDuration");
 				animation.isLooping = animationData.at("isLooping");
 				animation.isReversed = animationData.value("reversed", false);
+				animation.particlePreset = animationData.value("particlePreset", std::string());
+				animation.particleFrame = animationData.value("particleFrame", -1);
 
 				set.animations[stateName] = animation;
 			}

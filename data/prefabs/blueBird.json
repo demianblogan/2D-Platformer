@@ -10,7 +10,9 @@
 			"textureName": "blue_bird_fly",
 			"frameCount": 9,
 			"frameDuration": 0.06,
-			"isLooping": true
+			"isLooping": true,
+			"particlePreset": "wing_flap",
+			"particleFrame": 4
 		},
 		"Hit":
 		{
