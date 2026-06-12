@@ -2,6 +2,7 @@
 	"Sprite":
 	{
 		"textureName": "bananas",
+		"glow": [ 255, 220, 70 ],
 		"offsetY": 8
 	},
 	"AnimationSet":

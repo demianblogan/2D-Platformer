@@ -343,8 +343,14 @@ void LevelCompleteState::Render(float /*interpolationFactor*/)
 		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CX, Y_ENEMIES);
 	}
 
+	// Bloom the earned stars at world strength, then the highlighted button
+	// at UI strength — separate composites so each gets its own intensity.
+	context.virtualScreen.CompositeGlow();
+
 	if (phase == Phase::Done)
 		completeInterface.Draw(rt);
+
+	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
 }
 
 void LevelCompleteState::DrawStars(sf::RenderTarget& rt) const
@@ -386,5 +392,8 @@ void LevelCompleteState::DrawStars(sf::RenderTarget& rt) const
 		sprite.setScale({ scale, scale });
 		sprite.setPosition({ starX, starY });
 		rt.draw(sprite);
+
+		if (earned[i])
+			context.virtualScreen.GetGlowTarget().draw(sprite);
 	}
 }

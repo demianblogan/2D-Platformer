@@ -48,6 +48,7 @@ namespace UI
 	private:
 		void CollectInteractives();
 		void CollectInteractivesFrom(Element& element, std::vector<InteractiveElement*>* currentRow);
+		void CollectGlowingFrom(Element& element);
 
 		void HandleMouseMove();
 		void HandleMousePress();
@@ -67,6 +68,7 @@ namespace UI
 		VirtualScreen& virtualScreen;
 		std::unique_ptr<Element> content;
 		std::vector<std::vector<InteractiveElement*>> rows;
+		std::vector<Element*> glowingElements; // always-glowing decorations (e.g. the title)
 
 		InputMode activeMode = InputMode::Cursor;
 		int focusRow = -1;

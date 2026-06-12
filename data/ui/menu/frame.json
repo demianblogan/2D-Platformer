@@ -13,6 +13,7 @@
 				"Label":
 				{
 					"name": "title",
+					"glow": true,
 					"anchor":
 					[
 						0.5,

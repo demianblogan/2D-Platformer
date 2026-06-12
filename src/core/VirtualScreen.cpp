@@ -7,15 +7,22 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 VirtualScreen::VirtualScreen()
 	: renderTexture({ WIDTH, HEIGHT })
 	, blurTexture({ WIDTH, HEIGHT })
+	, glowTexture({ WIDTH, HEIGHT })
+	, haloTexture({ WIDTH, HEIGHT })
 	, camera(sf::FloatRect({ 0.0f, 0.0f }, { static_cast<float>(WIDTH), static_cast<float>(HEIGHT) }))
 {
 	renderTexture.setSmooth(false);
 	renderTexture.setView(camera);
 	blurTexture.setSmooth(false);
+	glowTexture.setSmooth(false);
+	haloTexture.setSmooth(false);
+	glowTexture.setView(camera);
+	glowTexture.clear(sf::Color::Transparent);
 
 	// Post effects degrade gracefully: without shader support the virtual
 	// screen is simply blitted as before.
@@ -30,6 +37,32 @@ VirtualScreen::VirtualScreen()
 
 	if (blurSupported)
 		blurShader.setUniform("texture", sf::Shader::CurrentTexture);
+
+	silhouetteSupported = sf::Shader::isAvailable()
+		&& silhouetteShader.loadFromFile("assets/shaders/glow_silhouette.frag", sf::Shader::Type::Fragment);
+
+	if (silhouetteSupported)
+		silhouetteShader.setUniform("texture", sf::Shader::CurrentTexture);
+
+	compositeSupported = sf::Shader::isAvailable()
+		&& compositeShader.loadFromFile("assets/shaders/glow_composite.frag", sf::Shader::Type::Fragment);
+
+	if (compositeSupported)
+		compositeShader.setUniform("texture", sf::Shader::CurrentTexture);
+}
+
+sf::RenderStates VirtualScreen::GlowSilhouetteStates(sf::Color color)
+{
+	sf::RenderStates states;
+
+	if (!silhouetteSupported)
+		return states; // aura falls back to the sprite's own colors
+
+	silhouetteShader.setUniform("glowColor", sf::Glsl::Vec3(
+		color.r / 255.0f, color.g / 255.0f, color.b / 255.0f));
+	states.shader = &silhouetteShader;
+
+	return states;
 }
 
 void VirtualScreen::BlurContents(int iterations)
@@ -83,6 +116,88 @@ void VirtualScreen::SetColorGrading(const ColorGrading& grading)
 void VirtualScreen::Clear()
 {
 	renderTexture.clear(sf::Color::Black);
+
+	if (glowUsed)
+	{
+		// Stale glow that was never composited last frame.
+		glowTexture.clear(sf::Color::Transparent);
+		glowUsed = false;
+	}
+}
+
+sf::RenderTarget& VirtualScreen::GetGlowTarget()
+{
+	glowUsed = true;
+	return glowTexture;
+}
+
+void VirtualScreen::CompositeGlow(float strength)
+{
+	if (!glowUsed)
+		return;
+
+	glowUsed = false;
+
+	// Bloom needs the blur and composite shaders; without them drop the layer.
+	if (!blurSupported || !compositeSupported)
+	{
+		glowTexture.clear(sf::Color::Transparent);
+		return;
+	}
+
+	const sf::View previousMainView = renderTexture.getView();
+	const sf::View screenView(sf::FloatRect(
+		{ 0.0f, 0.0f }, { static_cast<float>(WIDTH), static_cast<float>(HEIGHT) }));
+
+	sf::RenderStates blurStates;
+	blurStates.shader = &blurShader;
+	blurStates.blendMode = sf::BlendNone;
+
+	glowTexture.display();
+
+	// Widen the glow sources; the untouched original stays in glowTexture,
+	// the blurred result lands in haloTexture.
+	const sf::Texture* source = &glowTexture.getTexture();
+	for (int i = 0; i < GLOW_BLUR_ITERATIONS; i++)
+	{
+		blurShader.setUniform("direction", sf::Glsl::Vec2(1.0f / WIDTH, 0.0f));
+		blurTexture.draw(sf::Sprite(*source), blurStates);
+		blurTexture.display();
+
+		blurShader.setUniform("direction", sf::Glsl::Vec2(0.0f, 1.0f / HEIGHT));
+		haloTexture.draw(sf::Sprite(blurTexture.getTexture()), blurStates);
+		haloTexture.display();
+
+		source = &haloTexture.getTexture();
+	}
+
+	// Cut the original silhouettes out of the blur: only the spill that crept
+	// beyond the sprite remains, so the object itself stays crisp.
+	const sf::BlendMode cutOut(sf::BlendMode::Factor::Zero, sf::BlendMode::Factor::OneMinusSrcAlpha);
+	haloTexture.draw(sf::Sprite(glowTexture.getTexture()), cutOut);
+	haloTexture.display();
+
+	// Add the aura onto the scene, breathing between dim and full strength.
+	// The composite shader boosts the spill *coverage* (capped at the pure
+	// aura color) instead of stacking additive passes, so the inner aura
+	// stays at the chosen hue instead of clamping every channel to white.
+	const float seconds = effectClock.getElapsedTime().asSeconds();
+	const float pulse = GLOW_PULSE_MIN
+		+ (1.0f - GLOW_PULSE_MIN) * 0.5f * (1.0f + std::sin(seconds * GLOW_PULSE_SPEED));
+
+	compositeShader.setUniform("boost", GLOW_BOOST * strength);
+	compositeShader.setUniform("intensity", GLOW_INTENSITY * pulse);
+
+	sf::RenderStates additive;
+	additive.blendMode = sf::BlendMode(sf::BlendMode::Factor::One, sf::BlendMode::Factor::One);
+	additive.shader = &compositeShader;
+
+	renderTexture.setView(screenView);
+	renderTexture.draw(sf::Sprite(haloTexture.getTexture()), additive);
+	renderTexture.setView(previousMainView);
+
+	// Leave the layer empty for the next user (possibly later this frame).
+	glowTexture.clear(sf::Color::Transparent);
 }
 
 sf::RenderTarget& VirtualScreen::GetRenderTarget()
@@ -99,6 +214,7 @@ void VirtualScreen::SetCameraCenter(float x, float y)
 {
 	camera.setCenter({ x, y });
 	renderTexture.setView(camera);
+	glowTexture.setView(camera); // glow sources are drawn in the same space
 }
 
 void VirtualScreen::UpdateMousePosition(sf::Vector2i windowPosition, sf::RenderWindow& window)

@@ -2,6 +2,7 @@
 	"Sprite":
 	{
 		"textureName": "kiwi",
+		"glow": [ 140, 220, 80 ],
 		"offsetY": 8
 	},
 	"AnimationSet":

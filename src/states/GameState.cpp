@@ -155,7 +155,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, pickupSystem(registry, score, fruitsCollected)
 	, animationSystem(registry)
 	, playerAnimationSystem(registry)
-	, renderSystem(registry, context.resources, context.virtualScreen.GetRenderTarget())
+	, renderSystem(registry, context.resources, context.virtualScreen)
 	, hudInterface(context.virtualScreen)
 	, hudLoader(context.resources)
 	, levelPath(levelPath)
@@ -996,6 +996,9 @@ void GameState::Render(float interpolationFactor)
 	particles.Draw(renderTarget);
 	renderSystem.Render(interpolationFactor);
 	confetti.Draw(renderTarget);
+
+	// Bloom the glowing world objects (fruits, finish) before the HUD goes on.
+	context.virtualScreen.CompositeGlow();
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 	hudInterface.Draw(renderTarget);

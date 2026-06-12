@@ -2,6 +2,7 @@
 	"Sprite":
 	{
 		"textureName": "melon",
+		"glow": [ 255, 130, 180 ],
 		"offsetY": 8
 	},
 	"AnimationSet":
