@@ -8,6 +8,7 @@
 #include "components/Hidden.h"
 #include "components/Jump.h"
 #include "components/Player.h"
+#include "components/Spiky.h"
 #include "components/StompCustomDeath.h"
 #include "components/Stomped.h"
 #include "components/Transform.h"
@@ -70,7 +71,9 @@ namespace ECS
 				const float enemyCenterY  = transform.y - collider.height / 2.0f;
 				const bool  isStomping    = playerVelocity.y > 0.0f && playerCenterY < enemyCenterY;
 
-				if (isStomping)
+				// A Spiky enemy (e.g. the turtle with its spikes out) cannot be stomped:
+				// a stomp on it counts as ordinary contact and hurts the player instead.
+				if (isStomping && !registry.Has<Spiky>(entity))
 				{
 					// Most enemies die outright; an enemy that opts into a custom death
 					// (e.g. the snail) is only tagged, and its own system takes over.

@@ -123,5 +123,11 @@
 	"ghost_hit": "assets/textures/enemies/ghost/Hit (44x30).png",
 	"ghost_appear": "assets/textures/enemies/ghost/Appear (44x30).png",
 	"ghost_disappear": "assets/textures/enemies/ghost/Desappear (44x30).png",
-	"ghost_particles": "assets/textures/enemies/ghost/Gost Particles (48x16).png"
+	"ghost_particles": "assets/textures/enemies/ghost/Gost Particles (48x16).png",
+
+	"turtle_idle1": "assets/textures/enemies/turtle/Idle 1 (44x26).png",
+	"turtle_idle2": "assets/textures/enemies/turtle/Idle 2 (44x26).png",
+	"turtle_spikes_out": "assets/textures/enemies/turtle/Spikes out (44x26).png",
+	"turtle_spikes_in": "assets/textures/enemies/turtle/Spikes in (44x26).png",
+	"turtle_hit": "assets/textures/enemies/turtle/Hit (44x26).png"
 }

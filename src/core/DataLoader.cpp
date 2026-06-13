@@ -33,6 +33,7 @@
 #include "components/SnailAI.h"
 #include "components/StompCustomDeath.h"
 #include "components/Shell.h"
+#include "components/TurtleAI.h"
 #include "components/GhostAI.h"
 #include "components/Trampoline.h"
 #include "core/ecs/Registry.h"
@@ -290,6 +291,11 @@ void DataLoader::RegisterLoaders()
 			ECS::Shell shell;
 			shell.speed = data.value("speed", shell.speed);
 			registry.Add<ECS::Shell>(entity, shell);
+		};
+
+	loaders["TurtleAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::TurtleAI>(entity, {});
 		};
 
 	loaders["GhostAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
