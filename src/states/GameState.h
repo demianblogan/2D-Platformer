@@ -33,6 +33,7 @@
 #include "systems/SnailSystem.h"
 #include "systems/ShellSystem.h"
 #include "systems/GhostSystem.h"
+#include "systems/TurtleSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
@@ -141,6 +142,7 @@ private:
 	ECS::SnailSystem snailSystem;
 	ECS::ShellSystem shellSystem;
 	ECS::GhostSystem ghostSystem;
+	ECS::TurtleSystem turtleSystem;
 	ECS::GroundPatrolSystem groundPatrolSystem;
 	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;

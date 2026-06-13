@@ -1,20 +1,67 @@
 {
 	"Sprite":
 	{
-		"textureName": "turtle_idle"
+		"textureName": "turtle_idle2"
 	},
 	"AnimationSet":
 	{
-		"Idle":
+		"Idle2":
 		{
-			"textureName": "turtle_idle",
+			"textureName": "turtle_idle2",
 			"frameCount": 14,
-			"frameDuration": 0.10,
+			"frameDuration": 0.09,
 			"isLooping": true
+		},
+		"Idle1":
+		{
+			"textureName": "turtle_idle1",
+			"frameCount": 14,
+			"frameDuration": 0.09,
+			"isLooping": true
+		},
+		"SpikesOut":
+		{
+			"textureName": "turtle_spikes_out",
+			"frameCount": 8,
+			"frameDuration": 0.05,
+			"isLooping": false
+		},
+		"SpikesIn":
+		{
+			"textureName": "turtle_spikes_in",
+			"frameCount": 8,
+			"frameDuration": 0.05,
+			"isLooping": false
+		},
+		"Hit":
+		{
+			"textureName": "turtle_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
 		}
 	},
 	"AnimationState":
 	{
-		"current": "Idle"
-	}
+		"current": "Idle2"
+	},
+	"Gravity":
+	{
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 34,
+		"height": 20
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": { "scoreValue": 20 },
+	"TurtleAI": {}
 }
