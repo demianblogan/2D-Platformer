@@ -1,0 +1,24 @@
+{
+	"Transform": { "x": 0, "y": 0 },
+	"Sprite":
+	{
+		"textureName": "snail_without_shell"
+	},
+	"Gravity":
+	{
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 24,
+		"height": 16
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	}
+}

@@ -215,6 +215,8 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, plantSystem(registry)
 	, beeSystem(registry)
 	, chickenSystem(registry, particles)
+	, snailSystem(registry, sceneLoader)
+	, shellSystem(registry, context.audioMixer)
 	, groundPatrolSystem(registry, tilemap, particles)
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
@@ -907,6 +909,8 @@ void GameState::Update(float deltaTime)
 	plantSystem.Update(deltaTime);
 	beeSystem.Update(deltaTime);
 	chickenSystem.Update(deltaTime);
+	snailSystem.Update(deltaTime);
+	shellSystem.Update(deltaTime);
 	groundPatrolSystem.Update(deltaTime);
 	enemyDeathSystem.Update(deltaTime, fallLimit);
 	physicsSystem.Update(deltaTime);

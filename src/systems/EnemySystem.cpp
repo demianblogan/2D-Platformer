@@ -7,6 +7,8 @@
 #include "components/Health.h"
 #include "components/Jump.h"
 #include "components/Player.h"
+#include "components/StompCustomDeath.h"
+#include "components/Stomped.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "core/ecs/Registry.h"
@@ -46,8 +48,8 @@ namespace ECS
 		registry.ForEach<Enemy, Transform, Collider, Health>(
 			[&](Entity entity, Enemy& enemy, Transform& transform, Collider& collider, Health& health)
 			{
-				// Skip enemies that are already dying.
-				if (health.current <= 0 || registry.Has<EnemyDeath>(entity))
+				// Skip enemies that are already dying (or mid custom-death sequence).
+				if (health.current <= 0 || registry.Has<EnemyDeath>(entity) || registry.Has<Stomped>(entity))
 					return;
 
 				const float mHalfW = collider.width  / 2.0f;
@@ -68,7 +70,12 @@ namespace ECS
 
 				if (isStomping)
 				{
-					registry.Add<EnemyDeath>(entity, {});
+					// Most enemies die outright; an enemy that opts into a custom death
+					// (e.g. the snail) is only tagged, and its own system takes over.
+					if (registry.Has<StompCustomDeath>(entity))
+						registry.Add<Stomped>(entity, {});
+					else
+						registry.Add<EnemyDeath>(entity, {});
 
 					if (registry.Has<AnimationState>(entity))
 						registry.Get<AnimationState>(entity).current = "Hit";

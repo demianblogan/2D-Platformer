@@ -5,12 +5,26 @@
 	},
 	"AnimationSet":
 	{
+		"Idle":
+		{
+			"textureName": "snail_idle",
+			"frameCount": 15,
+			"frameDuration": 0.06,
+			"isLooping": true
+		},
 		"Walk":
 		{
 			"textureName": "snail_walk",
 			"frameCount": 10,
-			"frameDuration": 0.12,
+			"frameDuration": 0.09,
 			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "snail_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
 		}
 	},
 	"AnimationState":
@@ -19,14 +33,34 @@
 	},
 	"Facing":
 	{
-		"isLookingRight": true,
+		"isLookingRight": false,
 		"isTextureRight": false
 	},
-	"Patrol":
+	"Gravity":
 	{
-		"axis": "Horizontal",
-		"min": 0,
-		"max": 0,
-		"speed": 12
-	}
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 30,
+		"height": 18
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": { "scoreValue": 15 },
+	"GroundPatrol":
+	{
+		"speed": 16,
+		"direction": -1,
+		"turnIdleDuration": 1.5,
+		"moveAnim": "Walk"
+	},
+	"SnailAI": {},
+	"StompCustomDeath": {}
 }
