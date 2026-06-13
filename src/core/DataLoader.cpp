@@ -30,6 +30,9 @@
 #include "components/TrunkAI.h"
 #include "components/PlantAI.h"
 #include "components/BeeAI.h"
+#include "components/SnailAI.h"
+#include "components/StompCustomDeath.h"
+#include "components/Shell.h"
 #include "components/Trampoline.h"
 #include "core/ecs/Registry.h"
 
@@ -271,6 +274,23 @@ void DataLoader::RegisterLoaders()
 			registry.Add<ECS::BeeAI>(entity, bee);
 		};
 
+	loaders["SnailAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::SnailAI>(entity, {});
+		};
+
+	loaders["StompCustomDeath"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::StompCustomDeath>(entity, {});
+		};
+
+	loaders["Shell"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Shell shell;
+			shell.speed = data.value("speed", shell.speed);
+			registry.Add<ECS::Shell>(entity, shell);
+		};
+
 	loaders["ChickenAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
 			ECS::ChickenAI chicken;
@@ -288,8 +308,11 @@ void DataLoader::RegisterLoaders()
 	loaders["GroundPatrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
 			ECS::GroundPatrol patrol;
-			patrol.speed     = data.value("speed",     30.0f);
-			patrol.direction = data.value("direction", -1);
+			patrol.speed            = data.value("speed",     30.0f);
+			patrol.direction        = data.value("direction", -1);
+			patrol.turnIdleDuration = data.value("turnIdleDuration", patrol.turnIdleDuration);
+			patrol.moveAnim         = data.value("moveAnim", patrol.moveAnim);
+			patrol.idleAnim         = data.value("idleAnim", patrol.idleAnim);
 			registry.Add<ECS::GroundPatrol>(entity, patrol);
 		};
 
@@ -511,7 +534,11 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 							facing = property.at("value");
 					}
 
-					if (range > 0.0f)
+					// patrolRange only synthesises a Patrol for prefabs that actually use
+					// one (the air patrollers). A ground patroller (GroundPatrol, e.g. the
+					// snail) has no Patrol in its prefab, so the merged component would lack
+					// "speed" and throw; such enemies simply ignore patrolRange.
+					if (range > 0.0f && GetCachedJson(entry["prefab"].get<std::string>()).contains("Patrol"))
 					{
 						const bool  vertical = (direction == "up" || direction == "down");
 						const float center   = vertical ? y : x;

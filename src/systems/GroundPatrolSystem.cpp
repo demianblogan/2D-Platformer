@@ -6,6 +6,7 @@
 #include "components/EnemyDeath.h"
 #include "components/Facing.h"
 #include "components/GroundPatrol.h"
+#include "components/Stomped.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "core/ecs/Registry.h"
@@ -27,8 +28,9 @@ namespace ECS
 			[&](Entity entity, GroundPatrol& patrol, Transform& transform,
 				Collider& collider, Velocity& velocity, AnimationState& animState)
 			{
-				// EnemyDeathSystem owns the entity once it starts dying.
-				if (registry.Has<EnemyDeath>(entity))
+				// EnemyDeathSystem owns the entity once it starts dying; a Stomped enemy
+				// is mid custom-death sequence (e.g. the snail) and is owned by its system.
+				if (registry.Has<EnemyDeath>(entity) || registry.Has<Stomped>(entity))
 					return;
 
 				// AI systems (e.g. TrunkSystem) can suspend patrol during special behaviour.
@@ -58,9 +60,9 @@ namespace ECS
 					if (shouldTurn)
 					{
 						patrol.state      = GroundPatrol::State::TurningIdle;
-						patrol.stateTimer = GroundPatrol::TURN_IDLE_DURATION;
+						patrol.stateTimer = patrol.turnIdleDuration;
 						velocity.x        = 0.0f;
-						animState.current = "Idle";
+						animState.current = patrol.idleAnim;
 					}
 					else if (patrol.speed > 0.0f)
 					{
@@ -85,7 +87,7 @@ namespace ECS
 					{
 						patrol.direction  = -patrol.direction;
 						patrol.state      = GroundPatrol::State::Patrolling;
-						animState.current = "Run";
+						animState.current = patrol.moveAnim;
 					}
 					break;
 				}

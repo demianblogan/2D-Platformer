@@ -109,5 +109,13 @@
 
 	"chicken_idle": "assets/textures/enemies/chicken/Idle (32x34).png",
 	"chicken_run": "assets/textures/enemies/chicken/Run (32x34).png",
-	"chicken_hit": "assets/textures/enemies/chicken/Hit (32x34).png"
+	"chicken_hit": "assets/textures/enemies/chicken/Hit (32x34).png",
+
+	"snail_idle": "assets/textures/enemies/snail/Idle (38x24).png",
+	"snail_walk": "assets/textures/enemies/snail/Walk (38x24).png",
+	"snail_hit": "assets/textures/enemies/snail/Hit (38x24).png",
+	"snail_without_shell": "assets/textures/enemies/snail/Snail without shell.png",
+	"shell_idle": "assets/textures/enemies/snail/Shell Idle (38x24).png",
+	"shell_wall_hit": "assets/textures/enemies/snail/Shell Wall Hit (38x24).png",
+	"shell_top_hit": "assets/textures/enemies/snail/Shell Top Hit (38x24).png"
 }

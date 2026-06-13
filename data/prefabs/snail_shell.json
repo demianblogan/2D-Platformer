@@ -1,0 +1,65 @@
+{
+	"Transform": { "x": 0, "y": 0 },
+	"Sprite":
+	{
+		"textureName": "shell_idle"
+	},
+	"AnimationSet":
+	{
+		"Rest":
+		{
+			"textureName": "shell_idle",
+			"frameCount": 6,
+			"frameDuration": 100.0,
+			"isLooping": false
+		},
+		"Roll":
+		{
+			"textureName": "shell_idle",
+			"frameCount": 6,
+			"frameDuration": 0.05,
+			"isLooping": true
+		},
+		"WallHit":
+		{
+			"textureName": "shell_wall_hit",
+			"frameCount": 4,
+			"frameDuration": 0.04,
+			"isLooping": false
+		},
+		"TopHit":
+		{
+			"textureName": "shell_top_hit",
+			"frameCount": 5,
+			"frameDuration": 0.06,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Rest"
+	},
+	"Facing":
+	{
+		"isLookingRight": false,
+		"isTextureRight": false
+	},
+	"Gravity":
+	{
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 30,
+		"height": 16
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Shell": { "speed": 170 }
+}

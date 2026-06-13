@@ -30,6 +30,8 @@
 #include "systems/PlantSystem.h"
 #include "systems/BeeSystem.h"
 #include "systems/ChickenSystem.h"
+#include "systems/SnailSystem.h"
+#include "systems/ShellSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
@@ -135,6 +137,8 @@ private:
 	ECS::PlantSystem plantSystem;
 	ECS::BeeSystem beeSystem;
 	ECS::ChickenSystem chickenSystem;
+	ECS::SnailSystem snailSystem;
+	ECS::ShellSystem shellSystem;
 	ECS::GroundPatrolSystem groundPatrolSystem;
 	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;
